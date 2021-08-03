@@ -251,7 +251,6 @@ func main() {
 	flag.Parse()
 
 	var socketPath string
-
 	switch runtime := *runtimePtr; runtime {
 	case "docker":
 		socketPath = "unix:///var/run/dockershim.sock"
