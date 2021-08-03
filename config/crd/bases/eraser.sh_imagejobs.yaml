@@ -6694,18 +6694,30 @@ spec:
                     type: object
                 type: object
             required:
+<<<<<<< HEAD
             - imageListName
             - template
+=======
+            - 'template:'
+>>>>>>> origin/main
             type: object
           status:
             description: ImageJobStatus defines the observed state of ImageJob
             properties:
+<<<<<<< HEAD
               message:
+=======
+              'message:':
+>>>>>>> origin/main
                 description: Specifies if job was completed, and how many jobs succeeded
                   and failed
                 type: string
             required:
+<<<<<<< HEAD
             - message
+=======
+            - 'message:'
+>>>>>>> origin/main
             type: object
         type: object
     served: true
