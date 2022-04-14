@@ -231,7 +231,7 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			defer cancel()
 			checkImageRemoved(ctxT, t, getClusterNodes(t), nginx)
 
-			ctxT, cancel := context.WithTimeout(ctx, 5*time.Minute)
+			ctxT, cancel = context.WithTimeout(ctx, 5*time.Minute)
 			defer cancel()
 			checkImageRemoved(ctxT, t, getClusterNodes(t), redis)
 
