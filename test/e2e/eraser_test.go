@@ -378,20 +378,21 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			imgList.Spec.Images = append(imgList.Spec.Images, caddy)
-
-			if err := cfg.Client().Resources().Update(ctx, imgList); err != nil {
-				t.Fatal(err)
-			}
 			ctx = context.WithValue(ctx, prune, imgList)
 
 			ctxT, cancel := context.WithTimeout(ctx, 5*time.Minute)
 			defer cancel()
 			checkImageRemoved(ctxT, t, getClusterNodes(t), redis)
 
-			ctxT, cancel = context.WithTimeout(ctx, time.Minute)
-			defer cancel()
-			checkImageRemoved(ctxT, t, getClusterNodes(t), caddy)
+			/*	imgList.Spec.Images = append(imgList.Spec.Images, caddy)
+
+				if err := cfg.Client().Resources().Update(ctx, imgList); err != nil {
+					t.Fatal(err)
+				}
+
+				ctxT, cancel = context.WithTimeout(ctx, time.Minute)
+				defer cancel()
+				checkImageRemoved(ctxT, t, getClusterNodes(t), caddy) */
 
 			return ctx
 		}).
