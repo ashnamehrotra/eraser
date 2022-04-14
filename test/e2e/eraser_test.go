@@ -146,11 +146,6 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			newDeployment(cfg.Namespace(), caddy, 2, map[string]string{"app": caddy}, corev1.Container{Image: caddy, Name: caddy})
-			if err := cfg.Client().Resources().Create(ctx, newDeployment(cfg.Namespace(), caddy, 2, map[string]string{"app": caddy}, corev1.Container{Image: caddy, Name: caddy})); err != nil {
-				t.Fatal(err)
-			}
-
 			return ctx
 		}).
 		Assess("Deployments successfully deployed", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
@@ -178,15 +173,6 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			}
 			ctx = context.WithValue(ctx, redis, &redisDep)
 
-			caddyDep := appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{Name: caddy, Namespace: cfg.Namespace()},
-			}
-			if err = wait.For(conditions.New(client.Resources()).DeploymentConditionMatch(&caddyDep, appsv1.DeploymentAvailable, corev1.ConditionTrue),
-				wait.WithTimeout(time.Minute*1)); err != nil {
-				t.Fatal("caddy deployment not found", err)
-			}
-			ctx = context.WithValue(ctx, caddy, &caddyDep)
-
 			return ctx
 		}).
 		Assess("Remove some of the deployments so the images aren't running", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
@@ -202,13 +188,13 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 				t.Fatal("missing pods in redis deployment")
 			}
 
-			var caddyPods corev1.PodList
-			if err := cfg.Client().Resources().List(ctx, &caddyPods, func(o *metav1.ListOptions) {
-				o.LabelSelector = labels.SelectorFromSet(map[string]string{"app": caddy}).String()
+			var nginxPods corev1.PodList
+			if err := cfg.Client().Resources().List(ctx, &nginxPods, func(o *metav1.ListOptions) {
+				o.LabelSelector = labels.SelectorFromSet(map[string]string{"app": nginx}).String()
 			}); err != nil {
 				t.Fatal(err)
 			}
-			if len(caddyPods.Items) != 2 {
+			if len(nginxPods.Items) != 2 {
 				t.Fatal("missing pods in caddy deployment")
 			}
 
@@ -216,7 +202,7 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = cfg.Client().Resources().Delete(ctx, ctx.Value(caddy).(*appsv1.Deployment))
+			err = cfg.Client().Resources().Delete(ctx, ctx.Value(nginx).(*appsv1.Deployment))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -225,37 +211,29 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = wait.For(conditions.New(cfg.Client().Resources()).ResourcesDeleted(&caddyPods), wait.WithTimeout(time.Minute*1))
+			err = wait.For(conditions.New(cfg.Client().Resources()).ResourcesDeleted(&nginxPods), wait.WithTimeout(time.Minute*1))
 			if err != nil {
 				t.Fatal(err)
 			}
 			return ctx
 		}).
 		Assess("All non-running images are removed from the cluster", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			imgList := &eraserv1alpha1.ImageList{
-				ObjectMeta: metav1.ObjectMeta{Name: prune},
-				Spec: eraserv1alpha1.ImageListSpec{
-					Images: []string{"redis"},
-				},
+			// deploy imageJob config
+			if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist.yaml"); err != nil {
+				t.Error("Failed to deploy image list config", err)
 			}
 
-			if err := cfg.Client().Resources().Create(ctx, imgList); err != nil {
-				t.Fatal(err)
+			if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist_updated.yaml"); err != nil {
+				t.Error("Failed to deploy image list config", err)
 			}
-			ctx = context.WithValue(ctx, prune, imgList)
 
-			// The first check could take some extra time, where as things should be done already for the 2nd check.
-			// So we'll give plenty of time and fail slow here.
+			ctxT, cancel := context.WithTimeout(ctx, 5*time.Minute)
+			defer cancel()
+			checkImageRemoved(ctxT, t, getClusterNodes(t), nginx)
+
 			ctxT, cancel := context.WithTimeout(ctx, 5*time.Minute)
 			defer cancel()
 			checkImageRemoved(ctxT, t, getClusterNodes(t), redis)
-
-			/*	ctxT, cancel = context.WithTimeout(ctx, time.Minute)
-				defer cancel()
-				checkImageRemoved(ctxT, t, getClusterNodes(t), caddy) */
-
-			// Make sure nginx is still there
-			checkImagesExist(ctx, t, getClusterNodes(t), nginx)
 
 			return ctx
 		}).
