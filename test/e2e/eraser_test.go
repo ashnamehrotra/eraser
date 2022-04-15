@@ -217,7 +217,7 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			}
 			return ctx
 		}).
-		/*	Assess("All non-running images are removed from the cluster", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("All non-running images are removed from the cluster", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// deploy imageJob config
 			if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist.yaml"); err != nil {
 				t.Error("Failed to deploy image list config", err)
@@ -228,12 +228,22 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			checkImageRemoved(ctxT, t, getClusterNodes(t), nginx)
 
 			return ctx
-		}). */
-		Assess("update test", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist_updated.yaml"); err != nil {
-				t.Error("Failed to deploy image list config", err)
+		}).
+		Assess("Update imagelist to prune", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			imgList := &eraserv1alpha1.ImageList{
+				ObjectMeta: metav1.ObjectMeta{Name: prune},
+				Spec: eraserv1alpha1.ImageListSpec{
+					Images: []string{"*"},
+				},
 			}
 
+			if err := cfg.Client().Resources().Create(ctx, imgList); err != nil {
+				t.Fatal(err)
+			}
+			ctx = context.WithValue(ctx, prune, imgList)
+
+			// The first check could take some extra time, where as things should be done already for the 2nd check.
+			// So we'll give plenty of time and fail slow here.
 			ctxT, cancel := context.WithTimeout(ctx, 5*time.Minute)
 			defer cancel()
 			checkImageRemoved(ctxT, t, getClusterNodes(t), redis)

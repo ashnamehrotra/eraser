@@ -4,4 +4,4 @@ metadata:
   name: imagelist
 spec:
   images:
-    - *
+    - "*"
