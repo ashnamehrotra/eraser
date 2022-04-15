@@ -230,17 +230,10 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			return ctx
 		}).
 		Assess("Update imagelist to prune", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			imgList := &eraserv1alpha1.ImageList{
-				ObjectMeta: metav1.ObjectMeta{Name: prune},
-				Spec: eraserv1alpha1.ImageListSpec{
-					Images: []string{"*"},
-				},
+			// deploy imageJob config
+			if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist_updated.yaml"); err != nil {
+				t.Error("Failed to deploy image list config", err)
 			}
-
-			if err := cfg.Client().Resources().Update(ctx, imgList); err != nil {
-				t.Fatal(err)
-			}
-			ctx = context.WithValue(ctx, prune, imgList)
 
 			// The first check could take some extra time, where as things should be done already for the 2nd check.
 			// So we'll give plenty of time and fail slow here.
