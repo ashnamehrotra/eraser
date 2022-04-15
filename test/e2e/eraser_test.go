@@ -217,7 +217,7 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			}
 			return ctx
 		}).
-		Assess("All non-running images are removed from the cluster", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		/*	Assess("All non-running images are removed from the cluster", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// deploy imageJob config
 			if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist.yaml"); err != nil {
 				t.Error("Failed to deploy image list config", err)
@@ -228,7 +228,7 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 			checkImageRemoved(ctxT, t, getClusterNodes(t), nginx)
 
 			return ctx
-		}).
+		}). */
 		Assess("update test", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist_updated.yaml"); err != nil {
 				t.Error("Failed to deploy image list config", err)
