@@ -237,10 +237,10 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 				},
 			}
 
-			if err := cfg.Client().Resources().Create(ctx, imgList); err != nil {
+			if err := cfg.Client().Resources().Update(ctx, imgList); err != nil {
 				t.Fatal(err)
 			}
-			ctx = context.WithValue(ctx, prune, imgList)
+			ctx := context.WithValue(ctx, prune, imgList)
 
 			// The first check could take some extra time, where as things should be done already for the 2nd check.
 			// So we'll give plenty of time and fail slow here.
