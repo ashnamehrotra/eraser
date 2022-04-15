@@ -223,17 +223,17 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 				t.Error("Failed to deploy image list config", err)
 			}
 
-			if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist_updated.yaml"); err != nil {
+			/*	if err := deployEraserConfig(cfg.KubeconfigFile(), "eraser-system", "test-data", "eraser_v1alpha1_imagelist_updated.yaml"); err != nil {
 				t.Error("Failed to deploy image list config", err)
-			}
+			} */
 
 			ctxT, cancel := context.WithTimeout(ctx, 5*time.Minute)
 			defer cancel()
 			checkImageRemoved(ctxT, t, getClusterNodes(t), nginx)
 
-			ctxT, cancel = context.WithTimeout(ctx, 5*time.Minute)
-			defer cancel()
-			checkImageRemoved(ctxT, t, getClusterNodes(t), redis)
+			/*	ctxT, cancel = context.WithTimeout(ctx, 5*time.Minute)
+				defer cancel()
+				checkImageRemoved(ctxT, t, getClusterNodes(t), redis) */
 
 			return ctx
 		}).
