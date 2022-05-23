@@ -3,6 +3,7 @@ VERSION := v0.1.0
 # Image URL to use all building/pushing image targets
 MANAGER_IMG ?= ghcr.io/azure/eraser-manager:${VERSION}
 ERASER_IMG ?= ghcr.io/azure/eraser:${VERSION}
+COLLECTOR_IMG ?= ghrc.io/azure/collector:${VERSION}
 
 KUSTOMIZE_VERSION ?= 3.8.9
 KUBERNETES_VERSION ?= 1.23.0
@@ -26,7 +27,7 @@ ifdef CACHE_FROM
 _CACHE_FROM := --cache-from $(CACHE_FROM)
 endif
 
-OUTPUT_TYPE ?= type=registry
+OUTPUT_TYPE ?= type=docker
 TOOLS_DIR := hack/tools
 TOOLS_BIN_DIR := $(abspath $(TOOLS_DIR)/bin)
 GO_INSTALL := ./hack/go-install.sh
@@ -83,9 +84,13 @@ manifests: __controller-gen
 		output:crd:artifacts:config=config/crd/bases
 	rm -rf manifest_staging
 	mkdir -p manifest_staging/deploy
+	mkdir -p manifest_staging/charts/eraser
 	docker run --rm -v $(shell pwd):/eraser \
 		k8s.gcr.io/kustomize/kustomize:v${KUSTOMIZE_VERSION} build \
 		/eraser/config/default -o /eraser/manifest_staging/deploy/eraser.yaml
+	docker run --rm -v $(shell pwd):/eraser \
+		k8s.gcr.io/kustomize/kustomize:v${KUSTOMIZE_VERSION} build \
+		--load_restrictor LoadRestrictionsNone /eraser/third_party/open-policy-agent/gatekeeper/helmify | go run third_party/open-policy-agent/gatekeeper/helmify/*.go
 
 ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 generate: __controller-gen
@@ -125,6 +130,12 @@ docker-build-eraser:
 docker-push-eraser:
 	docker push ${ERASER_IMG}
 
+docker-build-collector:
+	docker buildx build $(_CACHE_FROM) $(_CACHE_TO) --platform="$(PLATFORM)" --output=$(OUTPUT_TYPE) -t ${COLLECTOR_IMG} --target collector .
+
+docker-push-collector:
+	docker push ${COLLECTOR_IMG}
+
 ##@ Deployment
 
 install: manifests ## Install CRDs into the K8s cluster specified in ~/.kube/config.
@@ -153,13 +164,19 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 
 release-manifest:
 	@sed -i -e 's/^VERSION := .*/VERSION := ${NEWVERSION}/' ./Makefile
+	@sed -i'' -e 's@image: $(REPOSITORY):.*@image: $(REPOSITORY):'"$(NEWVERSION)"'@' ./config/manager/manager.yaml
+	@sed -i "s/appVersion: .*/appVersion: ${NEWVERSION}/" ./third_party/open-policy-agent/gatekeeper/helmify/static/Chart.yaml
+	@sed -i "s/version: .*/version: $$(echo ${NEWVERSION} | cut -c2-)/" ./third_party/open-policy-agent/gatekeeper/helmify/static/Chart.yaml
+	@sed -i 's/Current release version: `.*`/Current release version: `'"${NEWVERSION}"'`/' ./third_party/open-policy-agent/gatekeeper/helmify/static/README.md
 	export
 	$(MAKE) manifests
+
 
 promote-staging-manifest:
 	@rm -rf deploy
 	@cp -r manifest_staging/deploy .
-
+	@rm -rf charts
+	@cp -r manifest_staging/charts .
 
 ENVTEST = $(shell pwd)/bin/setup-envtest
 .PHONY: envtest

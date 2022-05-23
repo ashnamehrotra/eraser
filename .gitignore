@@ -24,4 +24,7 @@ testbin/*
 *.swo
 *~
 
-.vscode
+# history files
+.history
+
+.vscode/
