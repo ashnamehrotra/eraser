@@ -25,6 +25,7 @@ import (
 	"k8s.io/cri-api/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -62,7 +63,6 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 }
 
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	log.Info("add collector controller")
 	// Create a new controller
 	c, err := controller.New("imagecollector-controller", mgr, controller.Options{
 		Reconciler: r,
@@ -71,10 +71,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &eraserv1alpha1.ImageCollector{}}, &handler.EnqueueRequestForObject{})
+	//err = c.Watch(&source.Kind{Type: &eraserv1alpha1.ImageCollector{}}, &handler.EnqueueRequestForObject{})
 
+	events := make(chan event.GenericEvent)
 	// watch empty GenericEvent in order to start reconcile process
-	//err = c.Watch(&source.Channel{Source: make(chan event.GenericEvent)}, &handler.EnqueueRequestForOwner{OwnerType: &eraserv1alpha1.ImageCollector{}, IsController: true})
+	err = c.Watch(&source.Channel{Source: events}, &handler.EnqueueRequestForOwner{OwnerType: &eraserv1alpha1.ImageCollector{}, IsController: true})
 
 	return nil
 }
@@ -97,17 +98,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// periodically create imageJob with collector pods
 	// add a label to let imagejob controller know that we dont want to delete the ImageJob so that we can check the status of the job later in reconcile
 
-	imageList := &eraserv1alpha1.ImageList{}
-	err := r.Get(ctx, req.NamespacedName, imageList)
-	if err != nil {
-		return ctrl.Result{}, client.IgnoreNotFound(err)
-	}
+	imageCollector := &eraserv1alpha1.ImageCollector{}
 
 	job := &eraserv1alpha1.ImageJob{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "imagejob-",
 			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(imageList, imageList.GroupVersionKind()),
+				*metav1.NewControllerRef(imageCollector, imageCollector.GroupVersionKind()),
 			},
 		},
 		Spec: eraserv1alpha1.ImageJobSpec{
@@ -133,7 +130,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		Image collector controller creates shared imageCollector CR using deduplicated list in spec
 	*/
 
-	err = r.Create(ctx, job)
+	err := r.Create(ctx, job)
 	log.Info("creating imagejob", "job", job.Name)
 	if err != nil {
 		if errors.IsNotFound(err) {

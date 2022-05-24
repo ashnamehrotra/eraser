@@ -71,7 +71,6 @@ func init() {
 }
 
 func Add(mgr manager.Manager) error {
-	log.Info("imagejob Add")
 	return add(mgr, newReconciler(mgr))
 }
 
