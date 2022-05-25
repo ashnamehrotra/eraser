@@ -22,6 +22,8 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -31,6 +33,9 @@ import (
 
 	eraserv1alpha1 "github.com/Azure/eraser/api/v1alpha1"
 
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
@@ -68,13 +73,22 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	// Watch for changes to ImageJobs with ImageCollector owner (created by this collector controller)
+	err = c.Watch(&source.Kind{Type: &eraserv1alpha1.ImageJob{}}, &handler.EnqueueRequestForOwner{OwnerType: &eraserv1alpha1.ImageCollector{}, IsController: true})
+	if err != nil {
+		return err
+	}
+
+	// GenericEvent in order to trigger first reconcile
 	ch := make(chan event.GenericEvent)
 	err = c.Watch(&source.Channel{
 		Source: ch,
 	}, &handler.EnqueueRequestForObject{})
 
+	// go routine runs in background so that it does not block
 	go func() {
 		log.Info("Queueing first ImageCollector reconcile...")
+		// goes to ImageCollector Reconcile
 		ch <- event.GenericEvent{
 			Object: &eraserv1alpha1.ImageCollector{},
 		}
@@ -84,9 +98,9 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-//+kubebuilder:rbac:groups=eraser.sh.tutorial.kubebuilder.io,resources=imagecollectors,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=eraser.sh.tutorial.kubebuilder.io,resources=imagecollectors/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=eraser.sh.tutorial.kubebuilder.io,resources=imagecollectors/finalizers,verbs=update
+//+kubebuilder:rbac:groups=eraser.sh.azure-eraser.io,resources=imagecollectors,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=eraser.sh.azure-eraser.io,resources=imagecollectors/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=eraser.sh.azure-eraser.io,resources=imagecollectors/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -99,60 +113,73 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log.Info("ImageCollector Reconcile")
-	// periodically create imageJob with collector pods
-	// add a label to let imagejob controller know that we dont want to delete the ImageJob so that we can check the status of the job later in reconcile
 
-	// imageList := &eraserv1alpha1.ImageList{}
-	// err := r.Get(ctx, req.NamespacedName, imageList)
-	// if err != nil {
-	// 	return ctrl.Result{}, client.IgnoreNotFound(err)
-	// }
+	imageJob := &eraserv1alpha1.ImageJob{}
+	if err := r.Get(ctx, req.NamespacedName, imageJob); err != nil {
+		if errors.IsNotFound(err) {
+			if res, err := r.createImageJob(ctx); err != nil {
+				return res, err
+			}
+		} else {
+			return reconcile.Result{}, err
+		}
+	} else {
+		if imageJob.Status.Phase == eraserv1alpha1.PhaseCompleted {
+			log.Info("completed phase")
+			if res, err := r.createSharedCRD(ctx); err != nil {
+				return res, err
+			}
+		}
+	}
 
-	// job := &eraserv1alpha1.ImageJob{
-	// 	ObjectMeta: metav1.ObjectMeta{
-	// 		GenerateName: "imagejob-",
-	// 		OwnerReferences: []metav1.OwnerReference{
-	// 			*metav1.NewControllerRef(imageList, imageList.GroupVersionKind()),
-	// 		},
-	// 	},
-	// 	Spec: eraserv1alpha1.ImageJobSpec{
-	// 		JobTemplate: corev1.PodTemplateSpec{
-	// 			Spec: corev1.PodSpec{
-	// 				RestartPolicy: corev1.RestartPolicyNever,
-	// 				Containers: []corev1.Container{
-	// 					{
-	// 						Name:            "collector",
-	// 						Image:           *collectorImage,
-	// 						ImagePullPolicy: corev1.PullIfNotPresent,
-	// 					},
-	// 				},
-	// 				ServiceAccountName: "eraser-controller-manager",
-	// 			},
-	// 		},
-	// 	},
-	// }
+	// else there is a job in running phase, requeue
+	return ctrl.Result{RequeueAfter: time.Second * 30}, nil
+}
 
-	/*
-		ImageCollector controller reads from each imageCollector CR, deduplicates, and removes excluded images/registries (by reading from configmap)
-		ToDo - image collector controller decides what to do with images that have digests but no names associated with them
-		Image collector controller creates shared imageCollector CR using deduplicated list in spec
-	*/
+func (r *Reconciler) createImageJob(ctx context.Context) (ctrl.Result, error) {
+	job := &eraserv1alpha1.ImageJob{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: "imagejob-",
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(&eraserv1alpha1.ImageCollector{
+					TypeMeta:   metav1.TypeMeta{},
+					ObjectMeta: metav1.ObjectMeta{Name: "test", UID: types.UID("test")},
+				}, schema.GroupVersionKind{Group: "eraser.sh", Version: "v1alpha1", Kind: "ImageCollector"}),
+			},
+		},
+		Spec: eraserv1alpha1.ImageJobSpec{
+			JobTemplate: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					RestartPolicy: corev1.RestartPolicyNever,
+					Containers: []corev1.Container{
+						{
+							Name:            "collector",
+							Image:           *collectorImage,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+						},
+					},
+					ServiceAccountName: "eraser-controller-manager",
+				},
+			},
+		},
+	}
 
-	// err = r.Create(ctx, job)
-	// log.Info("creating imagejob", "job", job.Name)
-	// if err != nil {
-	// 	if errors.IsNotFound(err) {
-	// 		return reconcile.Result{}, nil
-	// 	}
-	// 	return reconcile.Result{}, err
-	// }
+	err := r.Create(ctx, job)
+	if err != nil {
+		log.Info("Could not create collector ImageJob")
+		if errors.IsNotFound(err) {
+			return reconcile.Result{}, nil
+		}
+		return reconcile.Result{}, err
+	}
 
-	return ctrl.Result{RequeueAfter: time.Second * 5}, nil
+	log.Info("Successfully created collector ImageJob", "job", job.Name)
+	return reconcile.Result{}, nil
+}
 
-	// once job is complete, for each collector in imagecollector list, get list of images
-	// store image in deduplicated list
-	// create imagecollector-shared crd
-	// delete individual imagecollector CRs
+func (r *Reconciler) createSharedCRD(ctx context.Context) (ctrl.Result, error) {
+	// implement once working
+	return reconcile.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
