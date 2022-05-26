@@ -108,7 +108,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - eraser.sh.tutorial.kubebuilder.io
+  - eraser.sh.azure-eraser.io
   resources:
   - imagecollectors
   verbs:
@@ -120,13 +120,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - eraser.sh.tutorial.kubebuilder.io
+  - eraser.sh.azure-eraser.io
   resources:
   - imagecollectors/finalizers
   verbs:
   - update
 - apiGroups:
-  - eraser.sh.tutorial.kubebuilder.io
+  - eraser.sh.azure-eraser.io
   resources:
   - imagecollectors/status
   verbs:

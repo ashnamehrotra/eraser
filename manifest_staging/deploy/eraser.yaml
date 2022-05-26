@@ -4301,7 +4301,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - eraser.sh.tutorial.kubebuilder.io
+  - eraser.sh.azure-eraser.io
   resources:
   - imagecollectors
   verbs:
@@ -4313,13 +4313,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - eraser.sh.tutorial.kubebuilder.io
+  - eraser.sh.azure-eraser.io
   resources:
   - imagecollectors/finalizers
   verbs:
   - update
 - apiGroups:
-  - eraser.sh.tutorial.kubebuilder.io
+  - eraser.sh.azure-eraser.io
   resources:
   - imagecollectors/status
   verbs:
@@ -4396,7 +4396,7 @@ spec:
         - --eraser-image=ghcr.io/azure/eraser:v0.1.0
         command:
         - /manager
-        image: ghcr.io/azure/eraser-manager:v0.1.0
+        image: ashnam/manager:v8
         livenessProbe:
           httpGet:
             path: /healthz

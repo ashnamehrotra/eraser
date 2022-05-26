@@ -22,8 +22,6 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -42,7 +40,8 @@ import (
 )
 
 var (
-	collectorImage = flag.String("collector-image", "ghcr.io/azure/collector:latest", "collector image")
+	//collectorImage = flag.String("collector-image", "ghcr.io/azure/collector:v0.1.0", "collector image")
+	collectorImage = flag.String("collector-image", "ashnam/collector:final", "collector image")
 	log            = logf.Log.WithName("controller").WithValues("process", "imagecollector-controller")
 )
 
@@ -73,11 +72,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to ImageJobs with ImageCollector owner (created by this collector controller)
-	err = c.Watch(&source.Kind{Type: &eraserv1alpha1.ImageJob{}}, &handler.EnqueueRequestForOwner{OwnerType: &eraserv1alpha1.ImageCollector{}, IsController: true})
-	if err != nil {
-		return err
-	}
+	// fix with predicates similar to imagelist reconcile
+	/*
+		// Watch for changes to ImageJobs with ImageCollector owner (created by this collector controller)
+		err = c.Watch(&source.Kind{Type: &eraserv1alpha1.ImageJob{}}, &handler.EnqueueRequestForOwner{OwnerType: &eraserv1alpha1.ImageCollector{}, IsController: true})
+		if err != nil {
+			return err
+		} */
 
 	// GenericEvent in order to trigger first reconcile
 	ch := make(chan event.GenericEvent)
@@ -113,6 +114,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log.Info("ImageCollector Reconcile")
+	// created shared image collector CR
 
 	imageJob := &eraserv1alpha1.ImageJob{}
 	if err := r.Get(ctx, req.NamespacedName, imageJob); err != nil {
@@ -121,31 +123,35 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				return res, err
 			}
 		} else {
+			// job failed phase?
 			return reconcile.Result{}, err
 		}
 	} else {
+		// never really reaches here
 		if imageJob.Status.Phase == eraserv1alpha1.PhaseCompleted {
 			log.Info("completed phase")
-			if res, err := r.createSharedCRD(ctx); err != nil {
+			if res, err := r.createSharedCRD(ctx, req); err != nil {
 				return res, err
 			}
 		}
 	}
 
 	// else there is a job in running phase, requeue
-	return ctrl.Result{RequeueAfter: time.Second * 30}, nil
+	return ctrl.Result{RequeueAfter: time.Second * 10}, nil
 }
 
 func (r *Reconciler) createImageJob(ctx context.Context) (ctrl.Result, error) {
+	// shouldnt be going to imagejob reconcile, should be going to imagecollector?
 	job := &eraserv1alpha1.ImageJob{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: "imagejob-",
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(&eraserv1alpha1.ImageCollector{
-					TypeMeta:   metav1.TypeMeta{},
-					ObjectMeta: metav1.ObjectMeta{Name: "test", UID: types.UID("test")},
-				}, schema.GroupVersionKind{Group: "eraser.sh", Version: "v1alpha1", Kind: "ImageCollector"}),
-			},
+			// shared imagecolelctor cr as owner
+			// OwnerReferences: []metav1.OwnerReference{
+			// 	*metav1.NewControllerRef(&eraserv1alpha1.ImageCollector{
+			// 		TypeMeta:   metav1.TypeMeta{},
+			// 		ObjectMeta: metav1.ObjectMeta{Name: "test", UID: types.UID("test")},
+			// 	}, schema.GroupVersionKind{Group: "eraser.sh", Version: "v1alpha1", Kind: "ImageCollector"}),
+			// },
 		},
 		Spec: eraserv1alpha1.ImageJobSpec{
 			JobTemplate: corev1.PodTemplateSpec{
@@ -177,8 +183,30 @@ func (r *Reconciler) createImageJob(ctx context.Context) (ctrl.Result, error) {
 	return reconcile.Result{}, nil
 }
 
-func (r *Reconciler) createSharedCRD(ctx context.Context) (ctrl.Result, error) {
-	// implement once working
+func (r *Reconciler) createSharedCRD(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	imageCollectorList := &eraserv1alpha1.ImageCollectorList{}
+	if err := r.Get(ctx, req.NamespacedName, imageCollectorList); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+	items := imageCollectorList.Items
+
+	// storing only names for now
+	var list []eraserv1alpha1.Image
+
+	for _, collector := range items {
+		temp := collector.Spec.Images
+		for _, img := range temp {
+			list = append(list, eraserv1alpha1.Image{Name: img.Name, Digest: img.Digest})
+		}
+	}
+
+	// TODO: deduplicate
+
+	if err := r.Create(ctx, &eraserv1alpha1.ImageCollector{
+		Spec: eraserv1alpha1.ImageCollectorSpec{Images: list},
+	}); err != nil {
+		return reconcile.Result{}, err
+	}
 	return reconcile.Result{}, nil
 }
 

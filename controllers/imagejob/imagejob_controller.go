@@ -15,10 +15,8 @@ package imagejob
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -29,7 +27,6 @@ import (
 	"k8s.io/kubernetes/pkg/scheduler/framework"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/noderesources"
 
-	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -154,6 +151,7 @@ func checkNodeFitness(pod *corev1.Pod, node *corev1.Node) bool {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.8.3/pkg/reconcile
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log.Info("ImageJob Reconcile")
 	imageJob := &eraserv1alpha1.ImageJob{}
 	if err := r.Get(ctx, req.NamespacedName, imageJob); err != nil {
 		imageJob.Status.Phase = eraserv1alpha1.PhaseFailed
@@ -278,6 +276,7 @@ func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1alpha1.
 	nodes := &corev1.NodeList{}
 	err := r.List(ctx, nodes)
 	if err != nil {
+		log.Info("cannot list nodes")
 		return err
 	}
 
@@ -297,38 +296,41 @@ func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1alpha1.
 		{Name: "NODE_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "spec.nodeName"}}},
 	}
 
-	var imgList eraserv1alpha1.ImageList
-	if err := r.Get(ctx, types.NamespacedName{Name: imageJob.OwnerReferences[0].Name}, &imgList); err != nil {
-		return fmt.Errorf("get image list %s: %w", imageJob.OwnerReferences[0].Name, err)
-	}
+	/*
+		var imgList eraserv1alpha1.ImageList
+		if err := r.Get(ctx, types.NamespacedName{Name: imageJob.OwnerReferences[0].Name}, &imgList); err != nil {
+			return fmt.Errorf("get image list %s: %w", imageJob.OwnerReferences[0].Name, err)
+		}
 
-	imgListJSON, err := json.Marshal(imgList.Spec.Images)
-	if err != nil {
-		return fmt.Errorf("marshal image list: %w", err)
-	}
+		imgListJSON, err := json.Marshal(imgList.Spec.Images)
+		if err != nil {
+			return fmt.Errorf("marshal image list: %w", err)
+		}
 
-	configName := imageJob.Name + "-imagelist"
-	if err := r.Create(ctx, &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      configName,
-			Namespace: namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(imageJob, imageJob.GroupVersionKind()),
+		configName := imageJob.Name + "-imagelist"
+		if err := r.Create(ctx, &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      configName,
+				Namespace: namespace,
+				OwnerReferences: []metav1.OwnerReference{
+					*metav1.NewControllerRef(imageJob, imageJob.GroupVersionKind()),
+				},
 			},
-		},
-		Immutable: boolPtr(true),
-		Data:      map[string]string{"images": string(imgListJSON)},
-	}); err != nil {
-		return fmt.Errorf("create configmap: %w", err)
-	}
+			Immutable: boolPtr(true),
+			Data:      map[string]string{"images": string(imgListJSON)},
+		}); err != nil {
+			return fmt.Errorf("create configmap: %w", err)
+		} */
 
 	nodeList, skipped, err := filterOutSkippedNodes(nodes, skipNodesSelectors)
 	if err != nil {
+		log.Info("cannot filter out skipped nodes")
 		return err
 	}
 
 	imageJob.Status.Skipped = skipped
 	if err := r.updateJobStatus(ctx, imageJob); err != nil {
+		log.Info("cannot update job status")
 		return err
 	}
 
@@ -346,7 +348,7 @@ func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1alpha1.
 
 		givenImage := imageJob.Spec.JobTemplate.Spec.Containers[0]
 		args := []string{
-			"--imagelist=" + filepath.Join(imgListPath, "images"),
+			// "--imagelist=" + filepath.Join(imgListPath, "images"),
 			"--runtime=" + runtimeName,
 			"--log-level=" + logger.GetLevel(),
 		}
@@ -354,22 +356,22 @@ func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1alpha1.
 			Args: append(givenImage.Args, args...),
 			VolumeMounts: []corev1.VolumeMount{
 				{MountPath: mountPath, Name: runtimeName + "-sock-volume"},
-				{MountPath: imgListPath, Name: configName},
+				//{MountPath: imgListPath, Name: configName},
 			},
 			Image:           givenImage.Image,
 			Name:            givenImage.Name,
 			ImagePullPolicy: givenImage.ImagePullPolicy,
 			Env:             env,
-			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{
-					"cpu":    resource.MustParse("7m"),
-					"memory": resource.MustParse("25Mi"),
-				},
-				Limits: corev1.ResourceList{
-					"cpu":    resource.MustParse("8m"),
-					"memory": resource.MustParse("30Mi"),
-				},
-			},
+			// Resources: corev1.ResourceRequirements{
+			// 	Requests: corev1.ResourceList{
+			// 		"cpu":    resource.MustParse("7m"),
+			// 		"memory": resource.MustParse("25Mi"),
+			// 	},
+			// 	Limits: corev1.ResourceList{
+			// 		"cpu":    resource.MustParse("8m"),
+			// 		"memory": resource.MustParse("30Mi"),
+			// 	},
+			// },
 		}
 
 		givenPodSpec := imageJob.Spec.JobTemplate.Spec
@@ -379,8 +381,9 @@ func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1alpha1.
 			NodeName:      nodeName,
 			Volumes: []corev1.Volume{
 				{Name: runtimeName + "-sock-volume", VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: mountPath}}},
-				{Name: configName, VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: configName}}}},
+				//{Name: configName, VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{LocalObjectReference: corev1.LocalObjectReference{Name: configName}}}},
 			},
+			ServiceAccountName: "eraser-controller-manager",
 		}
 
 		pod := &corev1.Pod{
@@ -405,13 +408,15 @@ func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1alpha1.
 
 		err = r.Create(ctx, pod)
 		if err != nil {
+			log.Info("cannot create collector pod")
 			return err
 		}
-		log.Info("Started eraser pod on node", "images", imgList.Spec.Images)
+		//log.Info("Started eraser pod on node", "images", imgList.Spec.Images)
 	}
 
 	imageJob.Status.Skipped = skipped
 	if err := r.updateJobStatus(ctx, imageJob); err != nil {
+		log.Info("cannot update job status 2")
 		return err
 	}
 
