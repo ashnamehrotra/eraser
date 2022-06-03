@@ -39,10 +39,7 @@ jobs:
   unit-test:
     name: "Unit Tests"
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
-      contents: write
+    permissions: write-all
     timeout-minutes: 10
     steps:
       - name: Set up Go 1.18
