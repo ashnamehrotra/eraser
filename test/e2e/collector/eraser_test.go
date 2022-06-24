@@ -10,6 +10,7 @@ import (
 
 	eraserv1alpha1 "github.com/Azure/eraser/api/v1alpha1"
 	"github.com/Azure/eraser/test/e2e/util"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -26,6 +27,7 @@ import (
 func TestRemoveImagesFromAllNodes(t *testing.T) {
 	const (
 		alpine = "alpine"
+		nginx  = "nginx"
 	)
 
 	collectScanErasePipelineFeat := features.New("Test Remove Image From All Nodes").
