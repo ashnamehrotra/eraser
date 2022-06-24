@@ -771,7 +771,7 @@ func TestRemoveImagesFromAllNodes(t *testing.T) {
 					Name:      "excluded",
 					Namespace: "eraser-system",
 				},
-				Data: map[string]string{"excluded": "docker.io/library/*"},
+				Data: map[string][]string{"excluded": "docker.io/library/*"},
 			}
 			if err := cfg.Client().Resources().Create(ctx, &excluded); err != nil {
 				t.Error("failed to create excluded configmap", err)
