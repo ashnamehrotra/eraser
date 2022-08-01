@@ -2,11 +2,17 @@ package main
 
 import (
 	"context"
+	"os"
 
 	util "github.com/Azure/eraser/pkg/utils"
+	"github.com/davecgh/go-spew/spew"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/events"
+	"k8s.io/client-go/tools/reference"
+	"k8s.io/kubectl/pkg/scheme"
 )
 
-func removeImages(c Client, targetImages []string) error {
+func removeImages(c Client, targetImages []string, recorder events.EventRecorder) error {
 	backgroundContext, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -66,6 +72,9 @@ func removeImages(c Client, targetImages []string) error {
 
 			deletedImages[imgDigestOrTag] = struct{}{}
 			log.Info("removed image", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
+			if *emitEvents {
+				emitEvent(recorder, idToTagListMap[digest], digest)
+			}
 			continue
 		}
 
@@ -96,6 +105,10 @@ func removeImages(c Client, targetImages []string) error {
 				continue
 			}
 			log.Info("removed image", "digest", digest, "name", idToTagListMap[digest])
+			if *emitEvents {
+				emitEvent(recorder, idToTagListMap[digest], digest)
+			}
+
 			deletedImages[digest] = struct{}{}
 		}
 		if success {
@@ -106,4 +119,21 @@ func removeImages(c Client, targetImages []string) error {
 	}
 
 	return nil
+}
+
+func emitEvent(recorder events.EventRecorder, name []string, digest string) {
+	nodeName := os.Getenv("NODE_NAME")
+	nodeRef := &corev1.ObjectReference{
+		Kind:      "Node",
+		Name:      nodeName,
+		Namespace: "",
+	}
+
+	spew.Dump(nodeRef)
+
+	ref, err := reference.GetReference(scheme.Scheme, nodeRef)
+	if err != nil {
+		log.Error(err, "could not get reference to node", nodeName)
+	}
+	recorder.Eventf(ref, nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "Container image %s with digest %s", name, digest)
 }
