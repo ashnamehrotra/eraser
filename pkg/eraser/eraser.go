@@ -26,7 +26,7 @@ var (
 	imageListPtr  = flag.String("imagelist", "", "name of ImageList")
 	enableProfile = flag.Bool("enable-pprof", false, "enable pprof profiling")
 	profilePort   = flag.Int("pprof-port", 6060, "port for pprof profiling. defaulted to 6060 if unspecified")
-	emitEvents    = flag.Bool("emit-events", true, "emit events for removed images")
+	emitEvents    = flag.Bool("emit-removal-event", true, "emit events for removed images")
 
 	// Timeout of connecting to server (default: 5m).
 	timeout  = 5 * time.Minute

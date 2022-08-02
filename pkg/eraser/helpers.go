@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	eraserv1alpha1 "github.com/Azure/eraser/api/v1alpha1"
 	util "github.com/Azure/eraser/pkg/utils"
 	"github.com/davecgh/go-spew/spew"
 	corev1 "k8s.io/api/core/v1"
@@ -64,6 +65,11 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 				continue
 			}
 
+			if _, deleted := deletedImages[digest]; deleted {
+				log.Info("image with digest already deleted", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
+				continue
+			}
+
 			err = c.deleteImage(backgroundContext, digest)
 			if err != nil {
 				log.Error(err, "error removing image", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
@@ -72,9 +78,6 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 
 			deletedImages[imgDigestOrTag] = struct{}{}
 			log.Info("removed image", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
-			if *emitEvents {
-				emitEvent(recorder, idToTagListMap[digest], digest)
-			}
 			continue
 		}
 
@@ -105,10 +108,6 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 				continue
 			}
 			log.Info("removed image", "digest", digest, "name", idToTagListMap[digest])
-			if *emitEvents {
-				emitEvent(recorder, idToTagListMap[digest], digest)
-			}
-
 			deletedImages[digest] = struct{}{}
 		}
 		if success {
@@ -118,10 +117,25 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 		}
 	}
 
+	if *emitEvents {
+		finalRemoved := make([]eraserv1alpha1.Image, len(deletedImages))
+		for digest := range deletedImages {
+			if len(idToTagListMap[digest]) > 0 {
+				finalRemoved = append(finalRemoved, eraserv1alpha1.Image{Digest: digest, Name: idToTagListMap[digest][0]})
+			} else {
+				finalRemoved = append(finalRemoved, eraserv1alpha1.Image{Digest: digest})
+			}
+		}
+
+		log.Info("emitting event with", "finalRemoved", finalRemoved)
+
+		emitEvent(recorder, finalRemoved)
+	}
+
 	return nil
 }
 
-func emitEvent(recorder events.EventRecorder, name []string, digest string) {
+func emitEvent(recorder events.EventRecorder, finalRemoved []eraserv1alpha1.Image) {
 	nodeName := os.Getenv("NODE_NAME")
 	nodeRef := &corev1.ObjectReference{
 		Kind:      "Node",
@@ -135,5 +149,5 @@ func emitEvent(recorder events.EventRecorder, name []string, digest string) {
 	if err != nil {
 		log.Error(err, "could not get reference to node", nodeName)
 	}
-	recorder.Eventf(ref, nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "Container image %s with digest %s", name, digest)
+	recorder.Eventf(ref, nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "Container images %v", finalRemoved)
 }
