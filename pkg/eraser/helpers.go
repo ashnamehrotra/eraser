@@ -65,6 +65,7 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 				continue
 			}
 
+			// in the case name and digest are both provided
 			if _, deleted := deletedImages[digest]; deleted {
 				log.Info("image with digest already deleted", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
 				continue
@@ -76,9 +77,8 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 				continue
 			}
 
-			deletedImages[imgDigestOrTag] = struct{}{}
 			log.Info("removed image", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
-			continue
+			deletedImages[imgDigestOrTag] = struct{}{}
 		}
 
 		digest, isRunning := runningImages[imgDigestOrTag]
@@ -86,13 +86,13 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 			log.Info("image is running", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
 			continue
 		}
-
 		log.Info("image is not on node", "given", imgDigestOrTag)
 	}
 
 	if prune {
 		success := true
 		for _, digest := range nonRunningImages {
+			// in the case both name -> digest and digest -> digest were present
 			if _, deleted := deletedImages[digest]; deleted {
 				continue
 			}
@@ -118,7 +118,7 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 	}
 
 	if *emitEvents {
-		finalRemoved := make([]eraserv1alpha1.Image, len(deletedImages))
+		var finalRemoved []eraserv1alpha1.Image
 		for digest := range deletedImages {
 			if len(idToTagListMap[digest]) > 0 {
 				finalRemoved = append(finalRemoved, eraserv1alpha1.Image{Digest: digest, Name: idToTagListMap[digest][0]})
@@ -126,9 +126,6 @@ func removeImages(c Client, targetImages []string, recorder events.EventRecorder
 				finalRemoved = append(finalRemoved, eraserv1alpha1.Image{Digest: digest})
 			}
 		}
-
-		log.Info("emitting event with", "finalRemoved", finalRemoved)
-
 		emitEvent(recorder, finalRemoved)
 	}
 
@@ -149,5 +146,6 @@ func emitEvent(recorder events.EventRecorder, finalRemoved []eraserv1alpha1.Imag
 	if err != nil {
 		log.Error(err, "could not get reference to node", nodeName)
 	}
-	recorder.Eventf(ref, nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "Container images %v", finalRemoved)
+	log.Info("recording event", "finalRemoved", finalRemoved)
+	recorder.Eventf(ref.DeepCopy(), nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "Container images %v", finalRemoved)
 }

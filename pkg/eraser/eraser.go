@@ -26,7 +26,8 @@ var (
 	imageListPtr  = flag.String("imagelist", "", "name of ImageList")
 	enableProfile = flag.Bool("enable-pprof", false, "enable pprof profiling")
 	profilePort   = flag.Int("pprof-port", 6060, "port for pprof profiling. defaulted to 6060 if unspecified")
-	emitEvents    = flag.Bool("emit-removal-event", true, "emit events for removed images")
+	// TODO: default to false
+	emitEvents = flag.Bool("emit-removal-event", true, "emit events for removed images")
 
 	// Timeout of connecting to server (default: 5m).
 	timeout  = 5 * time.Minute
@@ -107,6 +108,6 @@ func main() {
 func eventRecorder(ctx context.Context, kubeClient *kubernetes.Clientset) events.EventRecorder {
 	eventBroadcaster := events.NewBroadcaster(&events.EventSinkImpl{Interface: kubeClient.EventsV1()})
 	eventBroadcaster.StartRecordingToSink(ctx.Done())
-	eventRecorder := eventBroadcaster.NewRecorder(scheme.Scheme, "eraser-system")
+	eventRecorder := eventBroadcaster.NewRecorder(scheme.Scheme, "eraser-controller-manager")
 	return eventRecorder
 }
