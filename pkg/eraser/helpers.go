@@ -8,6 +8,7 @@ import (
 	util "github.com/Azure/eraser/pkg/utils"
 	"github.com/davecgh/go-spew/spew"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/events"
 	"k8s.io/client-go/tools/reference"
 	"k8s.io/kubectl/pkg/scheme"
@@ -137,6 +138,7 @@ func emitEvent(recorder events.EventRecorder, finalRemoved []eraserv1alpha1.Imag
 	nodeRef := &corev1.ObjectReference{
 		Kind:      "Node",
 		Name:      nodeName,
+		UID:       types.UID(nodeName),
 		Namespace: "",
 	}
 
@@ -146,6 +148,6 @@ func emitEvent(recorder events.EventRecorder, finalRemoved []eraserv1alpha1.Imag
 	if err != nil {
 		log.Error(err, "could not get reference to node", nodeName)
 	}
-	log.Info("recording event", "finalRemoved", finalRemoved)
-	recorder.Eventf(ref, nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "testing with short note")
+	log.Info("recording event 1", "finalRemoved", finalRemoved)
+	recorder.Eventf(ref, nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "testing with short note %s", "test")
 }
