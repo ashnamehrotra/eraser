@@ -108,6 +108,6 @@ func main() {
 func eventRecorder(ctx context.Context, kubeClient *kubernetes.Clientset) events.EventRecorder {
 	eventBroadcaster := events.NewBroadcaster(&events.EventSinkImpl{Interface: kubeClient.EventsV1()})
 	eventBroadcaster.StartRecordingToSink(ctx.Done())
-	eventRecorder := eventBroadcaster.NewRecorder(scheme.Scheme, "eraser-controller-manager")
+	eventRecorder := eventBroadcaster.NewRecorder(scheme.Scheme, "eraser-system")
 	return eventRecorder
 }

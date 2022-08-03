@@ -147,5 +147,5 @@ func emitEvent(recorder events.EventRecorder, finalRemoved []eraserv1alpha1.Imag
 		log.Error(err, "could not get reference to node", nodeName)
 	}
 	log.Info("recording event", "finalRemoved", finalRemoved)
-	recorder.Eventf(ref.DeepCopy(), nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "Container images %v", finalRemoved)
+	recorder.Eventf(ref, nil, corev1.EventTypeNormal, "RemovedImage", "removed image", "testing with short note")
 }
