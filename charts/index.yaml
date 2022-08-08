@@ -1,0 +1,17 @@
+apiVersion: v1
+entries:
+  eraser:
+  - apiVersion: v2
+    appVersion: v0.3.0
+    created: "2022-08-08T21:18:19.123161892Z"
+    description: A Helm chart for Eraser
+    digest: 745b337747e0ad396f394fd2cc3a89abdbcb8c995c39fd649fb67ad1a574fa65
+    home: https://github.com/Azure/eraser
+    name: eraser
+    sources:
+    - https://github.com/Azure/eraser.git
+    type: application
+    urls:
+    - https://ashnamehrotra.github.io/eraser/charts/eraser-0.3.0.tgz
+    version: 0.3.0
+generated: "2022-08-08T21:18:19.120424988Z"
