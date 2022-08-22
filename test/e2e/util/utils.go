@@ -50,7 +50,7 @@ const (
 	FilterNodeSelector   = "kubernetes.io/hostname=eraser-e2e-test-worker"
 	FilterLabelKey       = "eraser.sh/cleanup.filter"
 	FilterLabelValue     = "true"
-	TestLogDir           = "../eraser_logs"
+	TestLogDir           = "../../eraser_logs"
 	filemode             = 0o644
 )
 
@@ -446,7 +446,7 @@ func GetManagerLogs(ctx context.Context, cfg *envconf.Config, t *testing.T) erro
 	testName := strings.Split(t.Name(), "/")[0]
 
 	// get log output file path
-	path := filepath.Join("tmp", TestLogDir, testName)
+	path := filepath.Join(TestLogDir, testName)
 
 	var file *os.File
 	if !fileExists(filepath.Join(path, manager.Name)) {
@@ -519,7 +519,7 @@ func GetPodLogs(ctx context.Context, cfg *envconf.Config, t *testing.T, imagelis
 		testName := strings.Split(t.Name(), "/")[0]
 
 		// get log output file path
-		path := filepath.Join("tmp", TestLogDir, testName)
+		path := filepath.Join(TestLogDir, testName)
 
 		var file *os.File
 		if !fileExists(filepath.Join(path, pod.Name)) {
