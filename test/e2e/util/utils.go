@@ -443,15 +443,10 @@ func GetManagerLogs(ctx context.Context, cfg *envconf.Config, t *testing.T) erro
 		return err
 	}
 
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-
 	testName := strings.Split(t.Name(), "/")[0]
 
 	// get log output file path
-	path := filepath.Join(wd, TestLogDir, testName)
+	path := filepath.Join("tmp", TestLogDir, testName)
 
 	var file *os.File
 	if !fileExists(filepath.Join(path, manager.Name)) {
@@ -484,11 +479,6 @@ func GetManagerLogs(ctx context.Context, cfg *envconf.Config, t *testing.T) erro
 
 func GetPodLogs(ctx context.Context, cfg *envconf.Config, t *testing.T, imagelistTest bool) error {
 	c, err := cfg.NewClient()
-	if err != nil {
-		return err
-	}
-
-	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
@@ -529,7 +519,7 @@ func GetPodLogs(ctx context.Context, cfg *envconf.Config, t *testing.T, imagelis
 		testName := strings.Split(t.Name(), "/")[0]
 
 		// get log output file path
-		path := filepath.Join(wd, TestLogDir, testName)
+		path := filepath.Join("tmp", TestLogDir, testName)
 
 		var file *os.File
 		if !fileExists(filepath.Join(path, pod.Name)) {
