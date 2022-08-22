@@ -121,7 +121,15 @@ jobs:
           make manifests
           git diff --exit-code
 
-  e2e-test:
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: logs
+          path: |
+            logs-*.json
+
+e2e-test:
     name: "E2E Tests"
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -133,6 +141,11 @@ jobs:
         KUBERNETES_VERSION: ["1.22.9", "1.23.6", "1.24.1"]
         E2E_TEST: ${{ fromJson(needs.build-e2e-test-list.outputs.e2e-tests) }}
     steps:
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: eraser_logs
+          path: ~/eraser/test/e2e/tests/eraser_logs/*
       - name: Harden Runner
         uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95
         with:
@@ -155,10 +168,6 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-      - uses: actions/upload-artifact@v3
-        with:
-          name: eraser_logs
-          path: ~/eraser/test/e2e/tests/eraser_logs/*
       - uses: crazy-max/ghaction-github-runtime@v2
       - name: Build eraser-manager
         run: make docker-build-manager
