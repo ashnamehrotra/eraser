@@ -170,7 +170,7 @@ jobs:
           uses: actions/upload-artifact@v3
           with:
             name: eraser_logs
-            path: ~/eraser/test/e2e/tests/eraser_logs/*
+            path: /home/runner/work/eraser/eraser/test/e2e/tests/eraser_logs/*
 
   scan_vulnerabilities:
     name: "[Trivy] Scan for vulnerabilities"
