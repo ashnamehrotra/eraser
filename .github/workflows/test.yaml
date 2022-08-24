@@ -124,6 +124,7 @@ jobs:
   e2e-test:
       name: "E2E Tests"
       runs-on: ubuntu-latest
+      permissions: write-all
       timeout-minutes: 30
       needs:
         - build-e2e-test-list
