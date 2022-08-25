@@ -166,15 +166,20 @@ jobs:
         - name: Build trivy-scanner
           run: make docker-build-trivy-scanner
         - name: Run e2e test
-          options: --user root
           run: make e2e-test KUBERNETES_VERSION=${{ matrix.KUBERNETES_VERSION }} E2E_TESTS=${{ matrix.E2E_TEST }}
-
         - name: Upload artifacts
           uses: actions/upload-artifact@v3
           with:
             name: eraser_logs
             path: ${GITHUB_ACTION_PATH}/test/e2e/eraser_logs/*
             retention-days: 1
+      - name: Test with Go
+        run: go test -json > TestResults-1.json
+      - name: Upload Go test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: Go-results-1
+          path: TestResults-1.json
 
   scan_vulnerabilities:
     name: "[Trivy] Scan for vulnerabilities"
