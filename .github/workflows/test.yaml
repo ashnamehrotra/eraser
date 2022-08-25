@@ -166,7 +166,9 @@ jobs:
         - name: Build trivy-scanner
           run: make docker-build-trivy-scanner
         - name: Run e2e test
+          options: --user root
           run: make e2e-test KUBERNETES_VERSION=${{ matrix.KUBERNETES_VERSION }} E2E_TESTS=${{ matrix.E2E_TEST }}
+
         - name: Upload artifacts
           uses: actions/upload-artifact@v3
           with:
