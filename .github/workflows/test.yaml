@@ -171,7 +171,7 @@ jobs:
           uses: actions/upload-artifact@v3
           with:
             name: eraser_logs
-            path: ${GITHUB_WORKSPACE}/test/e2e/eraser_logs/*
+            path: ${GITHUB_ACTION_PATH}/test/e2e/eraser_logs/*
             retention-days: 1
 
   scan_vulnerabilities:
