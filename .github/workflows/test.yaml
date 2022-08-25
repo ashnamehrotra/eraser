@@ -13,7 +13,7 @@ on:
 env:
   REGISTRY: ghcr.io
 
-permissions: write-all
+permissions: read-all|write-all
 
 jobs:
   build-e2e-test-list:
@@ -124,7 +124,7 @@ jobs:
   e2e-test:
       name: "E2E Tests"
       runs-on: ubuntu-latest
-      permissions: write-all
+      permissions: read-all|write-all
       timeout-minutes: 30
       needs:
         - build-e2e-test-list
@@ -171,11 +171,7 @@ jobs:
           uses: actions/upload-artifact@v3
           with:
             name: eraser_logs
-<<<<<<< HEAD
             path: ${GITHUB_WORKSPACE}/test/e2e/eraser_logs/*
-=======
-            path: ${GITHUB_WORKSPACE}/test/e2e/tests/eraser_logs/*
->>>>>>> b3a1dbe776691fb5f40aad1683b3d1454d6fb446
             retention-days: 1
 
   scan_vulnerabilities:
