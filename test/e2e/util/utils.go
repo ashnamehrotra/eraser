@@ -518,6 +518,7 @@ func GetPodLogs(ctx context.Context, cfg *envconf.Config, t *testing.T, imagelis
 
 		// get log output file path
 		path := filepath.Join(TestLogDir, testName)
+		t.Log("PATH: ", path)
 
 		var file *os.File
 		if err := os.MkdirAll(path, filemode); err != nil {
