@@ -176,6 +176,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return r.createImageJob(ctx, req, collectorArgs)
 	case 1:
 		// an imagejob has just completed; proceed to imagelist creation.
+
+		// record duration of collector imagejob for metrics
+		metrics.RecordImageJobCollectorDuration(float64(time.Since(startTime).Milliseconds()))
+
 		return r.handleCompletedImageJob(ctx, req, &imageJobList.Items[0])
 	default:
 		return ctrl.Result{}, fmt.Errorf("more than one collector ImageJobs are scheduled")
@@ -194,9 +198,6 @@ func (r *Reconciler) handleJobDeletion(ctx context.Context, job *eraserv1alpha1.
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-
-	// record duration of collector imagejob for metrics
-	metrics.ImageJobCollectorDuration.Record(ctx, float64(time.Since(startTime).Milliseconds()))
 
 	log.Info("end job deletion")
 	return ctrl.Result{}, nil

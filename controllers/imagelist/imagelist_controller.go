@@ -41,7 +41,6 @@ import (
 	eraserv1alpha1 "github.com/Azure/eraser/api/v1alpha1"
 	"github.com/Azure/eraser/controllers/util"
 	"github.com/Azure/eraser/pkg/logger"
-	"github.com/Azure/eraser/pkg/metrics"
 	"github.com/Azure/eraser/pkg/utils"
 )
 
@@ -171,9 +170,6 @@ func (r *Reconciler) handleJobDeletion(ctx context.Context, job *eraserv1alpha1.
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-
-	// record eraser imagejob duration for metrics
-	metrics.ImageJobEraserDuration.Record(ctx, float64(time.Since(startTime).Milliseconds()))
 
 	log.Info("end job deletion")
 	return ctrl.Result{}, nil
