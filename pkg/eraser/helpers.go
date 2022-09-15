@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"github.com/Azure/eraser/pkg/metrics"
 	util "github.com/Azure/eraser/pkg/utils"
 )
 
@@ -66,6 +67,8 @@ func removeImages(c Client, targetImages []string) error {
 
 			deletedImages[imgDigestOrTag] = struct{}{}
 			log.Info("removed image", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
+			metrics.ImagesRemoved.Add(backgroundContext, 1)
+			log.Info("added one to images removed metrics")
 			continue
 		}
 

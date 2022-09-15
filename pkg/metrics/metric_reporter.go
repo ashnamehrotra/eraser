@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	runtimemetrics "go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/metric/instrument/asyncfloat64"
@@ -29,18 +27,13 @@ var (
 )
 
 func InitMetricInstruments() error {
-	err, _ := InitPrometheusExporter(metricsAddr)
+	err, exporter := InitPrometheusExporter(metricsAddr)
 	if err != nil {
 		fmt.Println("unable to initialize prometheus exporter")
 		return err
 	}
 
-	if err := runtimemetrics.Start(); err != nil {
-		fmt.Println("unable to start metrics")
-		return err
-	}
-
-	http.Handle("/metrics", promhttp.Handler())
+	http.HandleFunc("/metrics", exporter.ServeHTTP)
 	go func() {
 		if err := http.ListenAndServe(metricsAddr, nil); err != nil {
 			klog.ErrorS(err, "failed to register prometheus endpoint", "metricsAddress", metricsAddr)
@@ -62,41 +55,42 @@ func InitMetricInstruments() error {
 		return err
 	}
 
-	/*
-		if PodsRunning, err = meter.AsyncFloat64().Gauge("pods_running", instrument.WithDescription("Count of total number of collector/eraser pods running"), instrument.WithUnit(unit.Milliseconds)); err != nil {
-			klog.InfoS("Failed to register instrument: PodsRunning")
-			return err
-		}
+	if PodsRunning, err = meter.AsyncFloat64().Gauge("pods_running", instrument.WithDescription("Count of total number of collector/eraser pods running"), instrument.WithUnit(unit.Milliseconds)); err != nil {
+		klog.InfoS("Failed to register instrument: PodsRunning")
+		return err
+	}
 
-		if ImagesRemoved, err = meter.SyncFloat64().Counter("images_removed", instrument.WithDescription("Count of total number of images removed")); err != nil {
-			klog.InfoS("Failed to register instrument: ImagesRemoved")
-			return err
-		}
+	if ImagesRemoved, err = meter.SyncFloat64().Counter("images_removed", instrument.WithDescription("Count of total number of images removed")); err != nil {
+		klog.InfoS("Failed to register instrument: ImagesRemoved")
+		return err
+	}
 
-		if VulnerableImages, err = meter.SyncFloat64().Counter("vulnerable_images", instrument.WithDescription("Count of total number of vulnerable images found")); err != nil {
-			klog.InfoS("Failed to register instrument: VulnerableImages")
-			return err
-		}
+	klog.Info("ImagesRemoved", "value", ImagesRemoved)
 
-		if ImageJobCollectorTotal, err = meter.SyncFloat64().Counter("imagejob_collector_total", instrument.WithDescription("Count of total number of collector imagejobs scheduled")); err != nil {
-			klog.InfoS("Failed to register instrument: ImageJobCollectorTotal")
-			return err
-		}
+	if VulnerableImages, err = meter.SyncFloat64().Counter("vulnerable_images", instrument.WithDescription("Count of total number of vulnerable images found")); err != nil {
+		klog.InfoS("Failed to register instrument: VulnerableImages")
+		return err
+	}
 
-		if ImageJobEraserTotal, err = meter.SyncFloat64().Counter("imagejob_eraser_total", instrument.WithDescription("Count of total number of eraser imagejobs scheduled")); err != nil {
-			klog.InfoS("Failed to register instrument: ImageJobEraserTotal")
-			return err
-		}
+	if ImageJobCollectorTotal, err = meter.SyncFloat64().Counter("imagejob_collector_total", instrument.WithDescription("Count of total number of collector imagejobs scheduled")); err != nil {
+		klog.InfoS("Failed to register instrument: ImageJobCollectorTotal")
+		return err
+	}
 
-		if PodsCompleted, err = meter.SyncFloat64().Counter("pods_completed", instrument.WithDescription("Count of total number of eraser imagejobs scheduled")); err != nil {
-			klog.InfoS("Failed to register instrument: PodsCompleted")
-			return err
-		}
+	if ImageJobEraserTotal, err = meter.SyncFloat64().Counter("imagejob_eraser_total", instrument.WithDescription("Count of total number of eraser imagejobs scheduled")); err != nil {
+		klog.InfoS("Failed to register instrument: ImageJobEraserTotal")
+		return err
+	}
 
-		if PodsFailed, err = meter.SyncFloat64().Counter("pods_failed", instrument.WithDescription("Count of total number of eraser imagejobs scheduled")); err != nil {
-			klog.InfoS("Failed to register instrument: PodsFailed")
-			return err
-		}
-	*/
+	if PodsCompleted, err = meter.SyncFloat64().Counter("pods_completed", instrument.WithDescription("Count of total number of eraser imagejobs scheduled")); err != nil {
+		klog.InfoS("Failed to register instrument: PodsCompleted")
+		return err
+	}
+
+	if PodsFailed, err = meter.SyncFloat64().Counter("pods_failed", instrument.WithDescription("Count of total number of eraser imagejobs scheduled")); err != nil {
+		klog.InfoS("Failed to register instrument: PodsFailed")
+		return err
+	}
+
 	return nil
 }
