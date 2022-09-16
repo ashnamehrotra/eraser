@@ -41,6 +41,7 @@ import (
 	eraserv1alpha1 "github.com/Azure/eraser/api/v1alpha1"
 	"github.com/Azure/eraser/controllers/util"
 	"github.com/Azure/eraser/pkg/logger"
+	"github.com/Azure/eraser/pkg/metrics"
 	"github.com/Azure/eraser/pkg/utils"
 )
 
@@ -151,6 +152,11 @@ func (r *Reconciler) handleJobListEvent(ctx context.Context, imageList *eraserv1
 			}
 			return ctrl.Result{}, nil
 		}
+
+		// record ImageJob metrics
+		metrics.RecordImageJobEraserDuration(float64(time.Since(startTime).Milliseconds()))
+		metrics.RecordPodsCompleted(int64(job.Status.Succeeded))
+		metrics.RecordPodsFailed(int64(job.Status.Failed))
 
 		return r.handleJobDeletion(ctx, job)
 	}
@@ -265,15 +271,17 @@ func (r *Reconciler) handleImageListEvent(ctx context.Context, req *ctrl.Request
 
 	job.Spec.JobTemplate.Spec.Volumes = append(job.Spec.JobTemplate.Spec.Volumes, exclusionVolume...)
 
-	err = r.Create(ctx, job)
-	log.Info("creating imagejob", "job", job.Name)
-	startTime = time.Now()
-	if err != nil {
+	if err = r.Create(ctx, job); err != nil {
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
 		return reconcile.Result{}, err
 	}
+
+	log.Info("creating imagejob", "job", job.Name)
+	startTime = time.Now()
+	// record imagejob to metrics
+	metrics.RecordImageJobEraserTotal()
 
 	configMap.ObjectMeta.OwnerReferences = []metav1.OwnerReference{*metav1.NewControllerRef(job, schema.GroupVersionKind{
 		Group:   "eraser.sh",

@@ -14,6 +14,7 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/Azure/eraser/pkg/logger"
+	"github.com/Azure/eraser/pkg/metrics"
 	util "github.com/Azure/eraser/pkg/utils"
 	"github.com/aquasecurity/fanal/artifact"
 	artifactImage "github.com/aquasecurity/fanal/artifact/image"
@@ -233,6 +234,9 @@ func main() {
 	if *deleteScanFailedImages {
 		vulnerableImages = append(vulnerableImages, failedImages...)
 	}
+
+	// record vulnerable images to non-compliant metrics
+	metrics.RecordNonCompliantImages(int64(len(vulnerableImages)))
 
 	// write vulnerable images to scanErase pipe for eraser to read
 	if err := util.WriteScanErasePipe(vulnerableImages); err != nil {

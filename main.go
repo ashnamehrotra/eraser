@@ -93,7 +93,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(config, ctrl.Options{
 		Scheme:                 scheme,
-		MetricsBindAddress:     "0",
+		MetricsBindAddress:     *metricsAddr,
 		Port:                   9443,
 		HealthProbeBindAddress: *probeAddr,
 		LeaderElection:         *enableLeaderElection,

@@ -68,8 +68,9 @@ func removeImages(c Client, targetImages []string) error {
 			deletedImages[imgDigestOrTag] = struct{}{}
 			log.Info("removed image", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
 
-			// add to ImagesRemoved in metrics
+			// record imagesRemoved metric
 			metrics.RecordImagesRemoved()
+
 			continue
 		}
 
@@ -101,6 +102,9 @@ func removeImages(c Client, targetImages []string) error {
 			}
 			log.Info("removed image", "digest", digest, "name", idToTagListMap[digest])
 			deletedImages[digest] = struct{}{}
+
+			// record imagesRemoved metric
+			metrics.RecordImagesRemoved()
 		}
 		if success {
 			log.Info("prune successful")

@@ -175,11 +175,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// collector ImageJob
 		return r.createImageJob(ctx, req, collectorArgs)
 	case 1:
-		// an imagejob has just completed; proceed to imagelist creation.
-
-		// record duration of collector imagejob for metrics
-		metrics.RecordImageJobCollectorDuration(float64(time.Since(startTime).Milliseconds()))
-
+		// an imagejob has just completed
 		return r.handleCompletedImageJob(ctx, req, &imageJobList.Items[0])
 	default:
 		return ctrl.Result{}, fmt.Errorf("more than one collector ImageJobs are scheduled")
@@ -206,6 +202,8 @@ func (r *Reconciler) handleJobDeletion(ctx context.Context, job *eraserv1alpha1.
 func (r *Reconciler) createImageJob(ctx context.Context, req ctrl.Request, argsCollector []string) (ctrl.Result, error) {
 	scanDisabled := *scannerImage == ""
 	startTime = time.Now()
+	// record imagejob to metrics
+	metrics.RecordImageJobCollectorTotal()
 
 	job := &eraserv1alpha1.ImageJob{
 		ObjectMeta: metav1.ObjectMeta{
@@ -338,6 +336,11 @@ func (r *Reconciler) handleCompletedImageJob(ctx context.Context, req ctrl.Reque
 			}
 			return ctrl.Result{}, nil
 		}
+
+		// record imagejob metrics
+		metrics.RecordImageJobCollectorDuration(float64(time.Since(startTime).Milliseconds()))
+		metrics.RecordPodsCompleted(int64(childJob.Status.Succeeded))
+		metrics.RecordPodsFailed(int64(childJob.Status.Failed))
 
 		if res, err := r.handleJobDeletion(ctx, childJob); err != nil || res.RequeueAfter > 0 {
 			return res, err
