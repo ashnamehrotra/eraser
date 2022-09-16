@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/metric/instrument/asyncfloat64"
 	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
+	"go.opentelemetry.io/otel/metric/instrument/syncint64"
 	"go.opentelemetry.io/otel/metric/unit"
 	"k8s.io/klog/v2"
 )
@@ -18,7 +19,7 @@ var (
 	ImageJobCollectorDuration syncfloat64.Histogram
 	ImageJobEraserDuration    syncfloat64.Histogram
 	PodsRunning               asyncfloat64.Gauge
-	ImagesRemoved             syncfloat64.Counter
+	ImagesRemoved             syncint64.Counter
 	VulnerableImages          syncfloat64.Counter
 	ImageJobCollectorTotal    syncfloat64.Counter
 	ImageJobEraserTotal       syncfloat64.Counter
@@ -46,12 +47,14 @@ func InitMetricInstruments() error {
 
 	meter := global.MeterProvider().Meter("eraser")
 
-	if ImageJobCollectorDuration, err = meter.SyncFloat64().Histogram("imagejob_collector_duration", instrument.WithDescription("Distribution of how long it took for collector imagejobs"), instrument.WithUnit(unit.Milliseconds)); err != nil {
+	ImageJobCollectorDuration, err = meter.SyncFloat64().Histogram("imagejob_collector_duration", instrument.WithDescription("Distribution of how long it took for collector imagejobs"), instrument.WithUnit(unit.Milliseconds))
+	if err != nil {
 		klog.InfoS("Failed to register instrument: ImageJobCollectorDuration")
 		return err
 	}
 
-	if ImagesRemoved, err = meter.SyncFloat64().Counter("images_removed", instrument.WithDescription("Count of total number of images removed")); err != nil {
+	ImagesRemoved, err = meter.SyncInt64().Counter("images_removed", instrument.WithDescription("Count of total number of images removed"))
+	if err != nil {
 		klog.InfoS("Failed to register instrument: ImagesRemoved")
 		return err
 	}
@@ -96,7 +99,7 @@ func InitMetricInstruments() error {
 	return nil
 }
 
-func AddImagesRemoved() {
+func RecordImagesRemoved() {
 	ImagesRemoved.Add(context.Background(), 1)
 }
 

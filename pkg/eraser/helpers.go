@@ -69,7 +69,7 @@ func removeImages(c Client, targetImages []string) error {
 			log.Info("removed image", "given", imgDigestOrTag, "digest", digest, "name", idToTagListMap[digest])
 
 			// add to ImagesRemoved in metrics
-			metrics.AddImagesRemoved()
+			metrics.RecordImagesRemoved()
 			continue
 		}
 
