@@ -61,9 +61,15 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler.
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
+	reporter, err := metrics.NewStatsReporter()
+	if err != nil {
+		log.Info("could not initialzie stats reporter")
+	}
+
 	return &Reconciler{
-		Client: mgr.GetClient(),
-		scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		scheme:   mgr.GetScheme(),
+		reporter: reporter,
 	}
 }
 
@@ -75,7 +81,8 @@ type ImageJobReconciler struct {
 // ImageListReconciler reconciles a ImageList object.
 type Reconciler struct {
 	client.Client
-	scheme *runtime.Scheme
+	scheme   *runtime.Scheme
+	reporter metrics.StatsReporter
 }
 
 //+kubebuilder:rbac:groups=eraser.sh,resources=imagelists,verbs=get;list;watch;create;update;patch;delete
@@ -154,9 +161,9 @@ func (r *Reconciler) handleJobListEvent(ctx context.Context, imageList *eraserv1
 		}
 
 		// record ImageJob metrics
-		metrics.RecordImageJobEraserDuration(float64(time.Since(startTime).Milliseconds()))
-		metrics.RecordPodsCompleted(int64(job.Status.Succeeded))
-		metrics.RecordPodsFailed(int64(job.Status.Failed))
+		r.reporter.RecordImageJobEraserDuration(float64(time.Since(startTime).Milliseconds()))
+		r.reporter.RecordPodsCompleted(int64(job.Status.Succeeded))
+		r.reporter.RecordPodsFailed(int64(job.Status.Failed))
 
 		return r.handleJobDeletion(ctx, job)
 	}
@@ -281,7 +288,7 @@ func (r *Reconciler) handleImageListEvent(ctx context.Context, req *ctrl.Request
 	log.Info("creating imagejob", "job", job.Name)
 	startTime = time.Now()
 	// record imagejob to metrics
-	metrics.RecordImageJobEraserTotal()
+	r.reporter.RecordImageJobEraserTotal()
 
 	configMap.ObjectMeta.OwnerReferences = []metav1.OwnerReference{*metav1.NewControllerRef(job, schema.GroupVersionKind{
 		Group:   "eraser.sh",

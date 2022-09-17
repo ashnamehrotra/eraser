@@ -67,7 +67,8 @@ func init() {
 // ImageCollectorReconciler reconciles a ImageCollector object.
 type Reconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme   *runtime.Scheme
+	reporter metrics.StatsReporter
 }
 
 func Add(mgr manager.Manager) error {
@@ -79,9 +80,15 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler.
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
+	reporter, err := metrics.NewStatsReporter()
+	if err != nil {
+		log.Info("could not initialzie stats reporter")
+	}
+
 	return &Reconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		reporter: reporter,
 	}
 }
 
@@ -203,7 +210,7 @@ func (r *Reconciler) createImageJob(ctx context.Context, req ctrl.Request, argsC
 	scanDisabled := *scannerImage == ""
 	startTime = time.Now()
 	// record imagejob to metrics
-	metrics.RecordImageJobCollectorTotal()
+	r.reporter.RecordImageJobCollectorTotal()
 
 	job := &eraserv1alpha1.ImageJob{
 		ObjectMeta: metav1.ObjectMeta{
@@ -338,9 +345,9 @@ func (r *Reconciler) handleCompletedImageJob(ctx context.Context, req ctrl.Reque
 		}
 
 		// record imagejob metrics
-		metrics.RecordImageJobCollectorDuration(float64(time.Since(startTime).Milliseconds()))
-		metrics.RecordPodsCompleted(int64(childJob.Status.Succeeded))
-		metrics.RecordPodsFailed(int64(childJob.Status.Failed))
+		r.reporter.RecordImageJobCollectorDuration(float64(time.Since(startTime).Milliseconds()))
+		r.reporter.RecordPodsCompleted(int64(childJob.Status.Succeeded))
+		r.reporter.RecordPodsFailed(int64(childJob.Status.Failed))
 
 		if res, err := r.handleJobDeletion(ctx, childJob); err != nil || res.RequeueAfter > 0 {
 			return res, err

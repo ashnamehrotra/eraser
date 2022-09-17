@@ -81,9 +81,9 @@ func main() {
 		}()
 	}
 
-	// initialize metric instruments
-	if err := metrics.InitMetricInstruments(); err != nil {
-		setupLog.Info("failed to create metric instruments", err)
+	// initialize prometheus exporter
+	if err := metrics.InitPrometheusExporter(":8088"); err != nil {
+		setupLog.Info("failed to intialize metrics exporter", err)
 	}
 
 	config := ctrl.GetConfigOrDie()
