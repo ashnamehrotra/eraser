@@ -3,7 +3,6 @@ package metrics
 import (
 	"context"
 
-	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/metric/instrument"
@@ -22,8 +21,6 @@ var (
 	imageJobEraserTotal       syncint64.Counter
 	podsCompleted             syncint64.Counter
 	podsFailed                syncint64.Counter
-	metricsAddr               = ":8088"
-	exporter                  *prometheus.Exporter
 )
 
 type reporter struct {

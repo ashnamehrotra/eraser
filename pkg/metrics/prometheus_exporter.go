@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/metric/global"
@@ -36,7 +37,11 @@ func InitPrometheusExporter(metricsAddr string) error {
 
 	http.HandleFunc("/metrics", exporter.ServeHTTP)
 	go func() {
-		if err := http.ListenAndServe(metricsAddr, nil); err != nil {
+		server := &http.Server{
+			Addr:              metricsAddr,
+			ReadHeaderTimeout: 5 * time.Second,
+		}
+		if err := server.ListenAndServe(); err != nil {
 			klog.ErrorS(err, "failed to register prometheus endpoint", "metricsAddress", metricsAddr)
 			os.Exit(1)
 		}

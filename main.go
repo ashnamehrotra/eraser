@@ -83,7 +83,7 @@ func main() {
 
 	// initialize prometheus exporter
 	if err := metrics.InitPrometheusExporter(":8088"); err != nil {
-		setupLog.Info("failed to intialize metrics exporter", err)
+		setupLog.Info("failed to initialize metrics exporter", err)
 	}
 
 	config := ctrl.GetConfigOrDie()
