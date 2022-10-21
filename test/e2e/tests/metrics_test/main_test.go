@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 	util.Testenv.Setup(
 		envfuncs.CreateKindClusterWithConfig(util.KindClusterName, util.NodeVersion, "../../kind-config.yaml"),
 		envfuncs.CreateNamespace(util.TestNamespace),
-		util.DeployOtelCollector(util.TestNamespace),
+		//util.DeployOtelCollector(util.TestNamespace),
 		envfuncs.LoadDockerImageToCluster(util.KindClusterName, util.ManagerImage),
 		envfuncs.LoadDockerImageToCluster(util.KindClusterName, util.Image),
 		envfuncs.LoadDockerImageToCluster(util.KindClusterName, util.VulnerableImage),
