@@ -38,8 +38,7 @@ func TestMain(m *testing.M) {
 			"--set", util.EraserImageTag.Set(eraserImage.Tag),
 			"--set", util.ManagerImageRepo.Set(managerImage.Repo),
 			"--set", util.ManagerImageTag.Set(managerImage.Tag),
-			// test quotes beginning and end
-			"--set", `controllerManager.additionalArgs={"--otlp-endpoint=otel-collector:4318"}`),
+			"--set", `"controllerManager.additionalArgs={--otlp-endpoint=otel-collector:4318}"`),
 	).Finish(
 		envfuncs.DestroyKindCluster(util.KindClusterName),
 	)
