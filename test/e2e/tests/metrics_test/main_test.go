@@ -14,7 +14,6 @@ import (
 	"sigs.k8s.io/e2e-framework/pkg/env"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/envfuncs"
-	"time"
 )
 
 func TestMain(m *testing.M) {
@@ -24,10 +23,6 @@ func TestMain(m *testing.M) {
 	managerImage := util.ParsedImages.ManagerImage
 
 	util.Testenv = env.NewWithConfig(envconf.New())
-
-	go util.GetManagerLogsTest()
-	time.Sleep(time.Minute * 2)
-
 	// Create KinD Cluster
 	util.Testenv.Setup(
 		envfuncs.CreateKindClusterWithConfig(util.KindClusterName, util.NodeVersion, "../../kind-config.yaml"),
@@ -45,6 +40,7 @@ func TestMain(m *testing.M) {
 			"--set", util.ManagerImageTag.Set(managerImage.Tag),
 			"--set", `controllerManager.additionalArgs={--otlp-endpoint=otel-collector:4318}`),
 	).Finish(
+		util.GetManagerLogsTest()
 		envfuncs.DestroyKindCluster(util.KindClusterName),
 	)
 	os.Exit(util.Testenv.Run(m))
