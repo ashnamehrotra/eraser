@@ -649,7 +649,7 @@ func GetManagerLogsTest() env.Func {
 
 		manager := pods.Items[0]
 
-		output, err := KubectlLogs(cfg.KubeconfigFile(), manager.Name, "", EraserNamespace)
+		output, err := KubectlLogs(cfg.KubeconfigFile(), manager.Name, "", TestNamespace)
 		if err != nil {
 			return ctx, err
 		}
