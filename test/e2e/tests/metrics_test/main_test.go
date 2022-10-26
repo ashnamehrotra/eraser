@@ -39,7 +39,7 @@ func TestMain(m *testing.M) {
 			"--set", util.ManagerImageRepo.Set(managerImage.Repo),
 			"--set", util.ManagerImageTag.Set(managerImage.Tag),
 			"--set", `controllerManager.additionalArgs={--otlp-endpoint="otel-collector:4318"}`),
-		util.GetManagerLogs(),
+		util.GetManagerLogsTest(),
 	).Finish(
 		envfuncs.DestroyKindCluster(util.KindClusterName),
 	)

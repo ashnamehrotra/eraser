@@ -624,6 +624,42 @@ func GetManagerLogs(ctx context.Context, cfg *envconf.Config, t *testing.T) erro
 	return nil
 }
 
+// just using for debugging purposes
+func GetManagerLogsTest() env.Func {
+	return func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
+		c, err := cfg.NewClient()
+		if err != nil {
+			klog.ErrorS(err, "Failed to create new Client")
+			return ctx, err
+		}
+
+		var pods corev1.PodList
+		err = c.Resources().List(ctx, &pods, func(o *metav1.ListOptions) {
+			o.LabelSelector = labels.SelectorFromSet(map[string]string{"control-plane": "controller-manager"}).String()
+		})
+		if err != nil {
+			return ctx, err
+		}
+
+		if len(pods.Items) > 1 {
+			return ctx, errors.New("only one manager pod should be present")
+		} else if len(pods.Items) == 0 {
+			return ctx, errors.New("no manager pod present")
+		}
+
+		manager := pods.Items[0]
+
+		output, err := KubectlLogs(cfg.KubeconfigFile(), manager.Name, "", EraserNamespace)
+		if err != nil {
+			return ctx, err
+		}
+
+		klog.Info("OUTPUT ", output)
+
+		return ctx, nil
+	}
+}
+
 func GetPodLogs(ctx context.Context, cfg *envconf.Config, t *testing.T, imagelistTest bool) error {
 	c, err := cfg.NewClient()
 	if err != nil {
