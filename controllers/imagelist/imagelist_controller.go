@@ -162,7 +162,7 @@ func (r *Reconciler) handleJobListEvent(ctx context.Context, imageList *eraserv1
 		ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 
-		exporter, reader, provider := metrics.ConfigureMetrics(ctx, log, *util.OtlpEndpoint)
+		exporter, reader, provider := metrics.ConfigureMetrics(ctx, log, util.OtlpEndpoint)
 		global.SetMeterProvider(provider)
 
 		defer metrics.ExportMetrics(log, exporter, reader, provider)
@@ -257,7 +257,7 @@ func (r *Reconciler) handleImageListEvent(ctx context.Context, req *ctrl.Request
 								},
 							},
 							SecurityContext: utils.SharedSecurityContext,
-							Env:             []corev1.EnvVar{{Name: "OTEL_EXPORTER_OTLP_ENDPOINT", Value: *util.OtlpEndpoint}, {Name: "NODE_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "spec.nodeName"}}}},
+							Env:             []corev1.EnvVar{{Name: "OTEL_EXPORTER_OTLP_ENDPOINT", Value: util.OtlpEndpoint}, {Name: "NODE_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "spec.nodeName"}}}},
 						},
 					},
 					ServiceAccountName: "eraser-imagejob-pods",
