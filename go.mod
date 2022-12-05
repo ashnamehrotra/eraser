@@ -192,8 +192,8 @@ require (
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/testify v1.8.1
 	github.com/tchap/go-patricia/v2 v2.3.1 // indirect
 	github.com/tmccombs/hcl2json v0.3.4 // indirect
 	github.com/twitchtv/twirp v8.1.1+incompatible // indirect
