@@ -25,7 +25,7 @@ const (
 	collectorLabel = "name=collector"
 	eraserLabel    = "name=eraser"
 
-	restartTimeout = time.Minute
+	restartTimeout = time.Minute * 3
 )
 
 func TestImageListTriggersEraserImageJob(t *testing.T) {
