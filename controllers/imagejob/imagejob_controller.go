@@ -419,6 +419,7 @@ func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1.ImageJ
 		if err != nil {
 			return err
 		}
+
 		log.Info("Started "+containerName+" pod on node", "nodeName", nodeName)
 		namespacedNames = append(namespacedNames, types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace})
 	}
@@ -455,6 +456,20 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func podsComplete(podList []corev1.Pod) bool {
 	for i := range podList {
 		if podList[i].Status.Phase == corev1.PodRunning || podList[i].Status.Phase == corev1.PodPending {
+			if containersNotFailed(podList[i]) {
+				return false
+			} else {
+				return true
+			}
+		}
+	}
+	return true
+}
+
+func containersNotFailed(pod corev1.Pod) bool {
+	statuses := pod.Status.ContainerStatuses
+	for i := range statuses {
+		if statuses[i].State.Terminated != nil {
 			return false
 		}
 	}
