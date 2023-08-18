@@ -1,0 +1,824 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: preload
+spec:
+  selector:
+    matchLabels:
+      name: preload
+  template:
+    metadata:
+      labels:
+        name: preload
+    spec:
+      initContainers:
+        - name: preload-1
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v1 2>&1 | tee /var/log/cl2-image-preload-1.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-2
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v2 2>&1 | tee /var/log/cl2-image-preload-2.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-3
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v3 2>&1 | tee /var/log/cl2-image-preload-3.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-4
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v4 2>&1 | tee /var/log/cl2-image-preload-4.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-5
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v5 2>&1 | tee /var/log/cl2-image-preload-5.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-6
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v6 2>&1 | tee /var/log/cl2-image-preload-6.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-7
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v7 2>&1 | tee /var/log/cl2-image-preload-7.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-8
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v8 2>&1 | tee /var/log/cl2-image-preload-8.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-9
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v9 2>&1 | tee /var/log/cl2-image-preload-9.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-10
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v10 2>&1 | tee /var/log/cl2-image-preload-10.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-11
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v11 2>&1 | tee /var/log/cl2-image-preload-11.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-12
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v12 2>&1 | tee /var/log/cl2-image-preload-12.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-13
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v13 2>&1 | tee /var/log/cl2-image-preload-13.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-14
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v14 2>&1 | tee /var/log/cl2-image-preload-14.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-15
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v15 2>&1 | tee /var/log/cl2-image-preload-15.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-16
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v16 2>&1 | tee /var/log/cl2-image-preload-16.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-17
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v17 2>&1 | tee /var/log/cl2-image-preload-17.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-18
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v18 2>&1 | tee /var/log/cl2-image-preload-18.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-19
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v19 2>&1 | tee /var/log/cl2-image-preload-19.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-20
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v20 2>&1 | tee /var/log/cl2-image-preload-20.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-21
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v21 2>&1 | tee /var/log/cl2-image-preload-21.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-22
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v22 2>&1 | tee /var/log/cl2-image-preload-22.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-23
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v23 2>&1 | tee /var/log/cl2-image-preload-23.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-24
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v24 2>&1 | tee /var/log/cl2-image-preload-24.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-25
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v25 2>&1 | tee /var/log/cl2-image-preload-25.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-26
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v26 2>&1 | tee /var/log/cl2-image-preload-26.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-27
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v27 2>&1 | tee /var/log/cl2-image-preload-27.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-28
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v28 2>&1 | tee /var/log/cl2-image-preload-28.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-29
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v29 2>&1 | tee /var/log/cl2-image-preload-29.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-30
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v30 2>&1 | tee /var/log/cl2-image-preload-30.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-31
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v31 2>&1 | tee /var/log/cl2-image-preload-31.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-32
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v32 2>&1 | tee /var/log/cl2-image-preload-32.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-33
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v33 2>&1 | tee /var/log/cl2-image-preload-33.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-34
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v34 2>&1 | tee /var/log/cl2-image-preload-34.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-35
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v35 2>&1 | tee /var/log/cl2-image-preload-35.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-36
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v36 2>&1 | tee /var/log/cl2-image-preload-36.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-37
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v37 2>&1 | tee /var/log/cl2-image-preload-37.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-38
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v38 2>&1 | tee /var/log/cl2-image-preload-38.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-39
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v39 2>&1 | tee /var/log/cl2-image-preload-39.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-40
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v40 2>&1 | tee /var/log/cl2-image-preload-40.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-41
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v41 2>&1 | tee /var/log/cl2-image-preload-41.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-42
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v42 2>&1 | tee /var/log/cl2-image-preload-42.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-43
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v43 2>&1 | tee /var/log/cl2-image-preload-43.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-44
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v44 2>&1 | tee /var/log/cl2-image-preload-44.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-45
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v45 2>&1 | tee /var/log/cl2-image-preload-45.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-46
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v46 2>&1 | tee /var/log/cl2-image-preload-46.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-47
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v47 2>&1 | tee /var/log/cl2-image-preload-47.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-48
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v48 2>&1 | tee /var/log/cl2-image-preload-48.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-49
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v49 2>&1 | tee /var/log/cl2-image-preload-49.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-50
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v50 2>&1 | tee /var/log/cl2-image-preload-50.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-51
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v51 2>&1 | tee /var/log/cl2-image-preload-51.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-52
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v52 2>&1 | tee /var/log/cl2-image-preload-52.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-53
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v53 2>&1 | tee /var/log/cl2-image-preload-53.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-54
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v54 2>&1 | tee /var/log/cl2-image-preload-54.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-55
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v55 2>&1 | tee /var/log/cl2-image-preload-55.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-56
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v56 2>&1 | tee /var/log/cl2-image-preload-56.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-57
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v57 2>&1 | tee /var/log/cl2-image-preload-57.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-58
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v58 2>&1 | tee /var/log/cl2-image-preload-58.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-59
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v59 2>&1 | tee /var/log/cl2-image-preload-59.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-60
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v60 2>&1 | tee /var/log/cl2-image-preload-60.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-61
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v61 2>&1 | tee /var/log/cl2-image-preload-61.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-62
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v62 2>&1 | tee /var/log/cl2-image-preload-62.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-63
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v63 2>&1 | tee /var/log/cl2-image-preload-63.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-64
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v64 2>&1 | tee /var/log/cl2-image-preload-64.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-65
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v65 2>&1 | tee /var/log/cl2-image-preload-65.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-66
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v66 2>&1 | tee /var/log/cl2-image-preload-66.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-67
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v67 2>&1 | tee /var/log/cl2-image-preload-67.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-68
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v68 2>&1 | tee /var/log/cl2-image-preload-68.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-69
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v69 2>&1 | tee /var/log/cl2-image-preload-69.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-70
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v70 2>&1 | tee /var/log/cl2-image-preload-70.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-71
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v71 2>&1 | tee /var/log/cl2-image-preload-71.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-72
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v72 2>&1 | tee /var/log/cl2-image-preload-72.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-73
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v73 2>&1 | tee /var/log/cl2-image-preload-73.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-74
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v74 2>&1 | tee /var/log/cl2-image-preload-74.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-75
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v75 2>&1 | tee /var/log/cl2-image-preload-75.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-76
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v76 2>&1 | tee /var/log/cl2-image-preload-76.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-77
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v77 2>&1 | tee /var/log/cl2-image-preload-77.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-78
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v78 2>&1 | tee /var/log/cl2-image-preload-78.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-79
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v79 2>&1 | tee /var/log/cl2-image-preload-79.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-80
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v80 2>&1 | tee /var/log/cl2-image-preload-80.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-81
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v81 2>&1 | tee /var/log/cl2-image-preload-81.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-82
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v82 2>&1 | tee /var/log/cl2-image-preload-82.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-83
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v83 2>&1 | tee /var/log/cl2-image-preload-83.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-84
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v84 2>&1 | tee /var/log/cl2-image-preload-84.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-85
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v85 2>&1 | tee /var/log/cl2-image-preload-85.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-86
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v86 2>&1 | tee /var/log/cl2-image-preload-86.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-87
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v87 2>&1 | tee /var/log/cl2-image-preload-87.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-88
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v88 2>&1 | tee /var/log/cl2-image-preload-88.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-89
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v89 2>&1 | tee /var/log/cl2-image-preload-89.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-90
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v90 2>&1 | tee /var/log/cl2-image-preload-90.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-91
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v91 2>&1 | tee /var/log/cl2-image-preload-91.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-92
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v92 2>&1 | tee /var/log/cl2-image-preload-92.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-93
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v93 2>&1 | tee /var/log/cl2-image-preload-93.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-94
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v94 2>&1 | tee /var/log/cl2-image-preload-94.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-95
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v95 2>&1 | tee /var/log/cl2-image-preload-95.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-96
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v96 2>&1 | tee /var/log/cl2-image-preload-96.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-97
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v97 2>&1 | tee /var/log/cl2-image-preload-97.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-98
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v98 2>&1 | tee /var/log/cl2-image-preload-98.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-99
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v99 2>&1 | tee /var/log/cl2-image-preload-99.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+        - name: preload-100
+          image: gcr.io/k8s-testimages/perf-tests-util/containerd:v0.0.1
+          command: ["sh", "-c", "ctr -n=k8s.io image pull asmehrotra.azurecr.io/vulnimage:v100 2>&1 | tee /var/log/cl2-image-preload-100.log"]
+          volumeMounts:
+          - name: containerd
+            mountPath: /run/containerd
+          - name: logs-volume
+            mountPath: /var/log
+      volumes:
+        - name: containerd
+          hostPath:
+            path: /run/containerd
+        - name: logs-volume
+          hostPath:
+            path: /var/log
+      containers:
+        - name: pause
+          image: gcr.io/google_containers/pause

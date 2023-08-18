@@ -88,10 +88,11 @@ runtimeConfig:
 
 deploy:
   image:
-    repo: ghcr.io/eraser-dev/eraser-manager
+    # whats diff between this one and the values file in manifest staging
+    repo: docker.io/ashnam/eraser-manager
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "v1.1.1"
+    tag: "test3"
   additionalArgs: []
   priorityClassName: ""
 

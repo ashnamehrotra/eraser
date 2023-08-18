@@ -1,6 +1,6 @@
-VERSION := v1.1.1
+VERSION := v1.2.0
 
-MANAGER_TAG ?= ${VERSION}
+MANAGER_TAG ?= test3
 TRIVY_SCANNER_TAG ?= ${VERSION}
 COLLECTOR_TAG ?= ${VERSION}
 REMOVER_TAG ?= ${VERSION}
@@ -11,14 +11,14 @@ TRIVY_SCANNER_IMG ?= ${TRIVY_SCANNER_REPO}:${TRIVY_SCANNER_TAG}
 TRIVY_BINARY_REPO ?= ghcr.io/aquasecurity/trivy
 TRIVY_BINARY_TAG ?= 0.43.0
 TRIVY_BINARY_IMG ?= ${TRIVY_BINARY_REPO}:${TRIVY_BINARY_TAG}
-MANAGER_REPO ?= ghcr.io/eraser-dev/eraser-manager
+MANAGER_REPO ?= docker.io/ashnam/eraser-manager
 MANAGER_IMG ?= ${MANAGER_REPO}:${MANAGER_TAG}
 REMOVER_REPO ?= ghcr.io/eraser-dev/remover
 REMOVER_IMG ?= ${REMOVER_REPO}:${REMOVER_TAG}
 COLLECTOR_REPO ?= ghcr.io/eraser-dev/collector
 COLLECTOR_IMG ?= ${COLLECTOR_REPO}:${COLLECTOR_TAG}
 VULNERABLE_IMG ?= docker.io/library/alpine:3.7.3
-EOL_IMG ?= docker.io/library/alpine:3.1
+EOL_IMG ?= docker.io/library/alpine:3.2
 BUSYBOX_BASE_IMG ?= busybox:1.36.0
 NON_VULNERABLE_IMG ?= ghcr.io/eraser-dev/non-vulnerable:latest
 E2E_TESTS ?= $(shell find ./test/e2e/tests/ -mindepth 1 -type d)
