@@ -329,6 +329,8 @@ func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1.ImageJ
 	)
 	if err != nil {
 		return err
+	} else {
+		log.Info("GOT POD TEMPLATE 2", template, "NAMESPACE", template.Namespace)
 	}
 
 	imageJob.Status = eraserv1.ImageJobStatus{
