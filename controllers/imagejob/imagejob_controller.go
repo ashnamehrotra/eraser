@@ -201,6 +201,7 @@ func checkNodeFitness(pod *corev1.Pod, node *corev1.Node) bool {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.8.3/pkg/reconcile
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log.Info("IN IMAGEJOB CONTROLLER")
 	imageJob := &eraserv1.ImageJob{}
 	if err := r.Get(ctx, req.NamespacedName, imageJob); err != nil {
 		imageJob.Status.Phase = eraserv1.PhaseFailed
@@ -244,18 +245,24 @@ func podListOptions(jobTemplate *corev1.PodTemplate) client.ListOptions {
 }
 
 func (r *Reconciler) handleRunningJob(ctx context.Context, imageJob *eraserv1.ImageJob) error {
+	log.Info("HANDLE RUNNING JOB")
 	// get eraser pods
 	podList := &corev1.PodList{}
 
 	template := corev1.PodTemplate{}
 	namespace := eraserUtils.GetNamespace()
 
+	// its failing here - pod template not found
 	err := r.Get(ctx, types.NamespacedName{
 		Name:      imageJob.GetName(),
 		Namespace: namespace,
 	}, &template)
 	if err != nil {
-		return err
+		imageJob.Status = eraserv1.ImageJobStatus{
+			Phase:       eraserv1.PhaseFailed,
+			DeleteAfter: controllerUtils.After(time.Now(), 1),
+		}
+		return r.updateJobStatus(ctx, imageJob)
 	}
 
 	listOpts := podListOptions(&template)
@@ -269,6 +276,7 @@ func (r *Reconciler) handleRunningJob(ctx context.Context, imageJob *eraserv1.Im
 	skipped := imageJob.Status.Skipped
 
 	if !podsComplete(podList.Items) {
+		log.Info("PODS NOT COMPLETE")
 		return nil
 	}
 
@@ -313,6 +321,7 @@ func (r *Reconciler) handleRunningJob(ctx context.Context, imageJob *eraserv1.Im
 }
 
 func (r *Reconciler) handleNewJob(ctx context.Context, imageJob *eraserv1.ImageJob) error {
+	log.Info("IN HANDLE NEW JOB")
 	nodes := &corev1.NodeList{}
 	err := r.List(ctx, nodes)
 	if err != nil {
@@ -456,6 +465,7 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func podsComplete(podList []corev1.Pod) bool {
+	log.Info("CHECKING PODS COMPLETE")
 	for i := range podList {
 		if podList[i].Status.Phase == corev1.PodRunning || podList[i].Status.Phase == corev1.PodPending {
 			return containersFailed(&podList[i])
@@ -475,6 +485,7 @@ func containersFailed(pod *corev1.Pod) bool {
 }
 
 func (r *Reconciler) updateJobStatus(ctx context.Context, imageJob *eraserv1.ImageJob) error {
+	log.Info("UPDATE JOB STATUS")
 	if imageJob.Name != "" {
 		if err := r.Status().Update(ctx, imageJob); err != nil {
 			return err
