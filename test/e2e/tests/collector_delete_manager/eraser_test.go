@@ -61,9 +61,11 @@ func TestDeleteManager(t *testing.T) {
 				t.Error("incorrect number of ImageJobs: ", len(ls.Items))
 			}
 
+			t.Info("IMAGEJOB", ls.Items[0].Name)
+
 			err = wait.For(conditions.New(c.Resources()).ResourcesDeleted(&ls), wait.WithTimeout(util.Timeout))
 			if err != nil {
-				t.Errorf("error waiting for pods to be deleted: %v", err)
+				t.Errorf("error waiting for ImageJob to be deleted: %v", err)
 			}
 
 			return ctx
