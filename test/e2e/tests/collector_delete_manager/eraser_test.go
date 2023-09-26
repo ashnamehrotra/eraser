@@ -61,7 +61,7 @@ func TestDeleteManager(t *testing.T) {
 				t.Error("incorrect number of ImageJobs: ", len(ls.Items))
 			}
 
-			t.Info("IMAGEJOB", ls.Items[0].Name)
+			t.Log("IMAGEJOB", ls.Items[0].Name)
 
 			err = wait.For(conditions.New(c.Resources()).ResourcesDeleted(&ls), wait.WithTimeout(util.Timeout))
 			if err != nil {
