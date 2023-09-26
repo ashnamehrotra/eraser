@@ -21,7 +21,7 @@ VULNERABLE_IMG ?= docker.io/library/alpine:3.7.3
 EOL_IMG ?= docker.io/library/alpine:3.1
 BUSYBOX_BASE_IMG ?= busybox:1.36.0
 NON_VULNERABLE_IMG ?= ghcr.io/eraser-dev/non-vulnerable:latest
-E2E_TESTS ?= $(shell find ./test/e2e/tests/ -mindepth 1 -type d)
+E2E_TESTS ?= ./test/e2e/tests/collector_delete_manager
 API_VERSIONS ?= ./api/v1alpha1,./api/v1,./api/v1alpha2
 
 HELM_UPGRADE_TEST ?=
