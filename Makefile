@@ -178,7 +178,7 @@ non-vulnerable-img:
 		-t ${NON_VULNERABLE_IMG} \
 		--target non-vulnerable .
 
-e2e-test: vulnerable-img non-vulnerable-img busybox-img collector-dummy-img
+e2e-test: vulnerable-img eol-img non-vulnerable-img busybox-img collector-dummy-img
 	for test in $(E2E_TESTS); do \
 		CGO_ENABLED=0 \
             PROJECT_ABSOLUTE_PATH=$(CURDIR) \
