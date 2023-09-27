@@ -502,7 +502,7 @@ spec:
               fieldPath: metadata.namespace
         - name: OTEL_SERVICE_NAME
           value: eraser-manager
-        image: docker.io/ashnam/eraser-manager:test3
+        image: docker.io/ashnam/eraser-manager:test13
         livenessProbe:
           httpGet:
             path: /healthz

@@ -255,7 +255,11 @@ func (r *Reconciler) handleRunningJob(ctx context.Context, imageJob *eraserv1.Im
 		Namespace: namespace,
 	}, &template)
 	if err != nil {
-		return err
+		imageJob.Status = eraserv1.ImageJobStatus{
+			Phase:       eraserv1.PhaseFailed,
+			DeleteAfter: controllerUtils.After(time.Now(), 1),
+		}
+		return r.updateJobStatus(ctx, imageJob)
 	}
 
 	listOpts := podListOptions(&template)
@@ -456,24 +460,20 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 func podsComplete(podList []corev1.Pod) bool {
 	for i := range podList {
 		if podList[i].Status.Phase == corev1.PodRunning || podList[i].Status.Phase == corev1.PodPending {
-			if containersNotFailed(podList[i]) {
-				return false
-			} else {
-				return true
-			}
+			return containersFailed(&podList[i])
 		}
 	}
 	return true
 }
 
-func containersNotFailed(pod corev1.Pod) bool {
+func containersFailed(pod *corev1.Pod) bool {
 	statuses := pod.Status.ContainerStatuses
 	for i := range statuses {
-		if statuses[i].State.Terminated != nil {
-			return false
+		if statuses[i].State.Terminated != nil && statuses[i].State.Terminated.ExitCode != 0 {
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func (r *Reconciler) updateJobStatus(ctx context.Context, imageJob *eraserv1.ImageJob) error {
