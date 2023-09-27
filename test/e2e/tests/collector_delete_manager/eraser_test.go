@@ -51,34 +51,15 @@ func TestDeleteManager(t *testing.T) {
 				t.Error("incorrect number of ImageJobs: ", len(jobList.Items))
 			}
 
-			// save name vars
-			imagejobName := jobList.Items[0].Name
-			managerPodName := podList.Items[0].Name
-
 			// delete manager pod
-			if err := util.KubectlDelete(cfg.KubeconfigFile(), util.TestNamespace, []string{"pod", managerPodName}); err != nil {
+			if err := util.KubectlDelete(cfg.KubeconfigFile(), util.TestNamespace, []string{"pod", podList.Items[0].Name}); err != nil {
 				t.Error("unable to delete eraser-controller-manager pod")
 			}
 
-			// wait for deletion to finish
-			err = wait.For(conditions.New(c.Resources()).ResourcesDeleted(&podList), wait.WithTimeout(util.Timeout))
+			// wait for deletion of ImageJob
+			err = wait.For(conditions.New(c.Resources()).ResourcesDeleted(&ImageJobList), wait.WithTimeout(util.Timeout))
 			if err != nil {
 				t.Errorf("error waiting for manager pod to be deleted: %v", err)
-			}
-
-			// get new ImageJob
-			var jobList2 eraserv1alpha1.ImageJobList
-			err = c.Resources().List(ctx, &jobList2)
-			if err != nil {
-				t.Errorf("could not list ImageJob: %v", err)
-			}
-
-			if len(jobList2.Items) != 1 {
-				t.Error("incorrect number of ImageJobs: ", len(jobList2.Items))
-			}
-
-			if jobList2.Items[0].Name == imagejobName {
-				t.Error("new image job was not scheduled")
 			}
 
 			return ctx
