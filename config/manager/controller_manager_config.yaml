@@ -5,7 +5,7 @@ manager:
   otlpEndpoint: ""
   logLevel: info
   scheduling:
-    repeatInterval: 24h
+    repeatInterval: 2m
     beginImmediately: true
   profile:
     enabled: false
@@ -14,7 +14,7 @@ manager:
     successRatio: 1.0
     cleanup:
       delayOnSuccess: 0s
-      delayOnFailure: 24h
+      delayOnFailure: 2
   pullSecrets: [] # image pull secrets for collector/scanner/eraser
   priorityClassName: "" # priority class name for collector/scanner/eraser
   nodeFilter:

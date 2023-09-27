@@ -7,6 +7,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/caarlos0/log"
 	"github.com/eraser-dev/eraser/test/e2e/util"
 
 	eraserv1alpha1 "github.com/eraser-dev/eraser/api/v1alpha1"
@@ -40,12 +41,14 @@ func TestDeleteManager(t *testing.T) {
 				t.Error("incorrect number of manager pods: ", len(podList.Items))
 			}
 
-			// get current ImageJob
+			// get current ImageJob before deleting manager pod
 			var jobList eraserv1alpha1.ImageJobList
 			err = c.Resources().List(ctx, &jobList)
 			if err != nil {
 				t.Errorf("could not list ImageJob: %v", err)
 			}
+
+			log.Info("job", jobList.Items[0], "name", jobList.Items[0].Name)
 
 			if len(jobList.Items) != 1 {
 				t.Error("incorrect number of ImageJobs: ", len(jobList.Items))
@@ -59,7 +62,7 @@ func TestDeleteManager(t *testing.T) {
 			// wait for deletion of ImageJob
 			err = wait.For(conditions.New(c.Resources()).ResourcesDeleted(&jobList), wait.WithTimeout(util.Timeout))
 			if err != nil {
-				t.Errorf("error waiting for manager pod to be deleted: %v", err)
+				t.Errorf("error waiting for ImageJob to be deleted: %v", err)
 			}
 
 			return ctx

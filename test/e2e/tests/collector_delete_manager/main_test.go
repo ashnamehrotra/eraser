@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 		util.LoadImageToCluster(util.KindClusterName, util.ManagerImage, util.ManagerTarballPath),
 		util.LoadImageToCluster(util.KindClusterName, util.RemoverImage, util.RemoverTarballPath),
 		util.LoadImageToCluster(util.KindClusterName, util.RemoverImage, util.RemoverTarballPath),
-		util.LoadImageToCluster(util.KindClusterName, util.CollectorImage, util.CollectorTarballPath),
+		util.LoadImageToCluster(util.KindClusterName, util.CollectorDummyImage, ""),
 		util.LoadImageToCluster(util.KindClusterName, util.NonVulnerableImage, ""),
 		util.HelmDeployLatestEraserRelease(util.TestNamespace,
 			"--set", util.ScannerEnable.Set("false"),
@@ -50,7 +50,7 @@ func TestMain(m *testing.M) {
 			"--set", util.CollectorImageTag.Set(collectorImage.Tag),
 			"--set", util.ManagerImageRepo.Set(managerImage.Repo),
 			"--set", util.ManagerImageTag.Set(managerImage.Tag),
-			"--set", util.CleanupOnSuccessDelay.Set("20m"),
+			"--set", util.CleanupOnSuccessDelay.Set("2m"),
 		),
 	).Finish(
 		envfuncs.DestroyKindCluster(util.KindClusterName),
