@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 			"--set", util.RemoverImageTag.Set(removerImage.Tag),
 			"--set", util.CollectorEnable.Set("true"),
 			"--set", util.CollectorImageRepo.Set(collectorImage.Repo),
-			"--set", util.CollectorImageTag.Set(collectorImage.Tag),
+			"--set", util.CollectorImageTag.Set("dummy"),
 			"--set", util.ManagerImageRepo.Set(managerImage.Repo),
 			"--set", util.ManagerImageTag.Set(managerImage.Tag),
 			"--set", util.CleanupOnSuccessDelay.Set("2m"),

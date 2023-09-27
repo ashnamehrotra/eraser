@@ -6,8 +6,8 @@ package e2e
 import (
 	"context"
 	"testing"
+	"time"
 
-	"github.com/caarlos0/log"
 	"github.com/eraser-dev/eraser/test/e2e/util"
 
 	eraserv1alpha1 "github.com/eraser-dev/eraser/api/v1alpha1"
@@ -22,6 +22,23 @@ import (
 
 func TestDeleteManager(t *testing.T) {
 	deleteManagerFeat := features.New("Deleting manager pod while current ImageJob is running should delete ImageJob and restart").
+		Assess("Wait for eraser pods running", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			c, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal("Failed to create new client", err)
+			}
+
+			err = wait.For(
+				util.NumPodsPresentForLabel(ctx, c, 3, util.ImageJobTypeLabelKey+"="+util.CollectorLabel),
+				wait.WithTimeout(time.Minute*2),
+				wait.WithInterval(time.Millisecond*500),
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Delete controller-manager pod", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			c, err := cfg.NewClient()
 			if err != nil {
@@ -48,7 +65,7 @@ func TestDeleteManager(t *testing.T) {
 				t.Errorf("could not list ImageJob: %v", err)
 			}
 
-			log.Info("job", jobList.Items[0], "name", jobList.Items[0].Name)
+			t.Log("job", jobList.Items[0], "name", jobList.Items[0].Name)
 
 			if len(jobList.Items) != 1 {
 				t.Error("incorrect number of ImageJobs: ", len(jobList.Items))
