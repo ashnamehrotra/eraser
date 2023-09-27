@@ -57,7 +57,7 @@ func TestDeleteManager(t *testing.T) {
 			}
 
 			// wait for deletion of ImageJob
-			err = wait.For(conditions.New(c.Resources()).ResourcesDeleted(&ImageJobList), wait.WithTimeout(util.Timeout))
+			err = wait.For(conditions.New(c.Resources()).ResourcesDeleted(&jobList), wait.WithTimeout(util.Timeout))
 			if err != nil {
 				t.Errorf("error waiting for manager pod to be deleted: %v", err)
 			}
