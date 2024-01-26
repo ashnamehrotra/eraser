@@ -34,7 +34,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -53,7 +52,6 @@ import (
 	v1alpha3Config "github.com/eraser-dev/eraser/api/v1alpha3/config"
 	"github.com/eraser-dev/eraser/controllers"
 	"github.com/eraser-dev/eraser/pkg/logger"
-	"github.com/eraser-dev/eraser/pkg/utils"
 	"github.com/eraser-dev/eraser/version"
 	//+kubebuilder:scaffold:imports
 )
@@ -111,17 +109,11 @@ func main() {
 		NewCache: cache.BuilderWithOptions(cache.Options{
 			SelectorsByObject: cache.SelectorsByObject{
 				// to watch eraser pods
-				&corev1.Pod{}: {
-					Field: fields.OneTermEqualSelector("metadata.namespace", utils.GetNamespace()),
-				},
+				&corev1.Pod{}: {},
 				// to watch eraser podTemplates
-				&corev1.PodTemplate{}: {
-					Field: fields.OneTermEqualSelector("metadata.namespace", utils.GetNamespace()),
-				},
+				&corev1.PodTemplate{}: {},
 				// to watch eraser-manager-configs
-				&corev1.ConfigMap{}: {
-					Field: fields.OneTermEqualSelector("metadata.namespace", utils.GetNamespace()),
-				},
+				&corev1.ConfigMap{}: {},
 				// to watch ImageJobs
 				&eraserv1.ImageJob{}: {},
 				// to watch ImageLists
