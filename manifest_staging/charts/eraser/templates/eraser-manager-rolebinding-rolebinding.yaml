@@ -1,5 +1,5 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
   labels:
     app.kubernetes.io/instance: '{{ .Release.Name }}'
@@ -7,9 +7,10 @@ metadata:
     app.kubernetes.io/name: '{{ template "eraser.name" . }}'
     helm.sh/chart: '{{ template "eraser.name" . }}'
   name: eraser-manager-rolebinding
+  namespace: '{{ .Release.Namespace }}'
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: eraser-manager-role
 subjects:
 - kind: ServiceAccount
