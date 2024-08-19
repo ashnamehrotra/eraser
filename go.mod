@@ -2,8 +2,20 @@ module github.com/eraser-dev/eraser
 
 go 1.18
 
+replace go.opentelemetry.io/otel => go.opentelemetry.io/otel v1.14.0
+
+replace go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp => go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v0.34.0
+
+replace go.opentelemetry.io/otel/metric => go.opentelemetry.io/otel/metric v0.34.0
+
+replace go.opentelemetry.io/otel/sdk => go.opentelemetry.io/otel/sdk v1.14.0
+
+replace go.opentelemetry.io/otel/sdk/metric => go.opentelemetry.io/otel/sdk/metric v0.34.0
+
+replace k8s.io/cri-api => k8s.io/cri-api v0.25.5
+
 require (
-	github.com/aquasecurity/trivy v0.35.0
+	github.com/aquasecurity/trivy v0.51.2
 	github.com/aquasecurity/trivy-db v0.0.0-20220627104749-930461748b63 // indirect
 	github.com/go-logr/logr v1.2.3
 	github.com/onsi/ginkgo/v2 v2.6.0
@@ -14,6 +26,7 @@ require (
 	go.opentelemetry.io/otel/metric v0.34.0
 	go.opentelemetry.io/otel/sdk v1.14.0
 	go.opentelemetry.io/otel/sdk/metric v0.34.0
+	go.opentelemetry.io/otel/semconv v1.20.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/sys v0.18.0
@@ -24,7 +37,7 @@ require (
 	// keeping this on 0.25 as updating to 0.26 will remove CRI v1alpha2 version
 	k8s.io/cri-api v0.25.5
 	k8s.io/klog/v2 v2.100.1
-	k8s.io/kubernetes v1.26.11
+	k8s.io/kubernetes v1.30.3 
 	k8s.io/utils v0.0.0-20230115233650-391b47cb4029
 	oras.land/oras-go v1.2.2
 	sigs.k8s.io/controller-runtime v0.14.1
